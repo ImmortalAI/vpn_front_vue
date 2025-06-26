@@ -53,11 +53,16 @@
 import { computed, ref } from 'vue';
 import { z } from 'zod';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
-// import { authLogin, authTgCode } from '@/api/auth/service';
-// import { AuthLoginRqSchema, AuthTgCodeRqSchema } from '@/api/auth/schema';
+import { authLogin, authTgCode } from '@/api/auth/service';
+import { AuthLoginRqSchema, AuthTgCodeRqSchema } from '@/api/auth/schema';
 import { isAxiosError } from 'axios';
 import useErrorToast from '@/composables/useErrorToast';
 import { useCountdown } from '@vueuse/core';
+import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+
+const router = useRouter();
+const toast = useToast();
 
 const telegramId = ref('');
 const telegramCode = ref('');
@@ -82,7 +87,12 @@ const countdown = useCountdown(30, {
 
 const sendCodeClick = async () => {
   try {
-    // await authTgCode(AuthTgCodeRqSchema.parse({ tg_id: telegramId.value }));
+    const res = await authTgCode(AuthTgCodeRqSchema.parse({ tg_id: telegramId.value }));
+    toast.add({
+      severity: 'success',
+      summary: res.message,
+      life: 1000,
+    });
     codeSended.value = true;
     countdown.start();
   } catch (e) {
@@ -96,9 +106,15 @@ const sendCodeClick = async () => {
 
 const loginClick = async () => {
   try {
-    // await authLogin(
-    //   AuthLoginRqSchema.parse({ tg_id: telegramId.value, tg_code: telegramCode.value }),
-    // );
+    const res = await authLogin(
+      AuthLoginRqSchema.parse({ tg_id: Number(telegramId.value), tg_code: telegramCode.value }),
+    );
+    toast.add({
+      severity: 'success',
+      summary: res.message,
+      life: 1000,
+    });
+    router.push('/dashboard');
   } catch (e) {
     if (isAxiosError(e)) {
       errorToast.error(e);
