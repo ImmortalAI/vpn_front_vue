@@ -31,22 +31,26 @@ export { UserSchema as UserGetRsSchema, type User as UserGetRs };
 
 // request patch /user/{user_id}
 export const UserPatchRqSchema = z.object({
-  telegram_id: z.number().int(),
-  rights: z.object({
-    is_server_editor: z.boolean(),
-    is_transaction_editor: z.boolean(),
-    is_active_period_editor: z.boolean(),
-    is_tariff_editor: z.boolean(),
-    is_member_rights_editor: z.boolean(),
-    is_admin_rights_editor: z.boolean(),
-    is_control_panel_user: z.boolean(),
-    is_verified: z.boolean(),
-  }),
-  settings: z.object({
-    auto_pay: z.boolean(),
-    is_active: z.boolean(),
-    get_traffic_notifications: z.boolean(),
-  }),
+  telegram_id: z.number().int().optional(),
+  rights: z
+    .object({
+      is_server_editor: z.boolean().optional(),
+      is_transaction_editor: z.boolean().optional(),
+      is_active_period_editor: z.boolean().optional(),
+      is_tariff_editor: z.boolean().optional(),
+      is_member_rights_editor: z.boolean().optional(),
+      is_admin_rights_editor: z.boolean().optional(),
+      is_control_panel_user: z.boolean().optional(),
+      is_verified: z.boolean().optional(),
+    })
+    .optional(),
+  settings: z
+    .object({
+      auto_pay: z.boolean().optional(),
+      is_active: z.boolean().optional(),
+      get_traffic_notifications: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 export type UserPatchRq = z.infer<typeof UserPatchRqSchema>;
