@@ -60,9 +60,11 @@ import useErrorToast from '@/composables/useErrorToast';
 import { useCountdown } from '@vueuse/core';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useUserStore } from '@/stores/user';
 
 const router = useRouter();
 const toast = useToast();
+const user = useUserStore();
 
 const telegramId = ref('');
 const telegramCode = ref('');
@@ -109,6 +111,7 @@ const loginClick = async () => {
     const res = await authLogin(
       AuthLoginRqSchema.parse({ tg_id: Number(telegramId.value), tg_code: telegramCode.value }),
     );
+    await user.refreshUser();
     toast.add({
       severity: 'success',
       summary: res.message,
