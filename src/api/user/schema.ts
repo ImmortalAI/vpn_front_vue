@@ -6,7 +6,7 @@ export const UserSchema = z.object({
   telegram_id: z.number().int(),
   telegram_username: z.string(),
   balance: z.number(),
-  created_date: z.string().datetime(),
+  created_date: z.string(), // TODO: temporary disable datetime format validation
   rights: z.object({
     is_server_editor: z.boolean(),
     is_transaction_editor: z.boolean(),
