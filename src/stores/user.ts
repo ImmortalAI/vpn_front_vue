@@ -1,10 +1,12 @@
 import { userGet } from '@/api/user/service';
 import type { User } from '@/api/user/schema';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null);
+
+  const loggedIn = computed(() => user.value !== null);
 
   const refreshUser = async () => {
     try {
@@ -15,5 +17,5 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  return { user, refreshUser };
+  return { user, loggedIn, refreshUser };
 });
