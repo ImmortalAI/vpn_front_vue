@@ -36,5 +36,5 @@ onMounted(async () => {
       throw e;
     }
   }
-})
+});
 </script>

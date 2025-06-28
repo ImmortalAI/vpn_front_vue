@@ -22,6 +22,15 @@ export const UserSchema = z.object({
     is_active: z.boolean(),
     get_traffic_notifications: z.boolean(),
   }),
+  tariff: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    duration: z.number(),
+    price: z.number(),
+    price_of_traffic_reset: z.number(),
+    traffic: z.number(),
+    is_special: z.boolean(),
+  }),
 });
 
 export type User = z.infer<typeof UserSchema>;
@@ -32,6 +41,7 @@ export { UserSchema as UserGetRsSchema, type User as UserGetRs };
 // request patch /user/{user_id}
 export const UserPatchRqSchema = z.object({
   telegram_id: z.number().int().optional(),
+  tariff_id: z.string().uuid().optional(),
   rights: z
     .object({
       is_server_editor: z.boolean().optional(),
