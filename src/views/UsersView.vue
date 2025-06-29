@@ -9,125 +9,93 @@
           <Column field="telegram_username" header="Имя пользователя"></Column>
           <Column field="balance" header="Баланс"></Column>
           <Column field="created_date" header="Дата регистрации"></Column>
-          <template #expansion="slotProps">
+          <Column field="rights" header="Права">
+            <template #body="slotProps">
+              <Button
+                icon="pi pi-pencil"
+                severity="secondary"
+                rounded
+                @click="openRightsModal(slotProps.data as User)"
+              />
+            </template>
+          </Column>
+          <template #expansion>
             <div class="p-4">
-              <p class="text-2xl">Права пользователя</p>
-              <div class="flex flex-col gap-4">
-                <div class="flex items-center gap-2">
-                  <Checkbox
-                    v-model="slotProps.data.rights.is_server_editor"
-                    inputId="isServerEditor"
-                    binary
-                  />
-                  <label for="isServerEditor">Редактирование серверов</label>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Checkbox
-                    v-model="slotProps.data.rights.is_transaction_editor"
-                    inputId="isTransactionEditor"
-                    binary
-                  />
-                  <label for="isTransactionEditor">Редактирование транзакций</label>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Checkbox
-                    v-model="slotProps.data.rights.is_active_period_editor"
-                    inputId="isActivePeriodEditor"
-                    binary
-                  />
-                  <label for="isActivePeriodEditor">Редактирование активных периодов</label>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Checkbox
-                    v-model="slotProps.data.rights.is_tariff_editor"
-                    inputId="isTariffEditor"
-                    binary
-                  />
-                  <label for="isTariffEditor">Редактирование тарифов</label>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Checkbox
-                    v-model="slotProps.data.rights.is_member_rights_editor"
-                    inputId="isMemberRightsEditor"
-                    binary
-                  />
-                  <label for="isMemberRightsEditor">Редактирование прав пользователей</label>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Checkbox
-                    v-model="slotProps.data.rights.is_admin_rights_editor"
-                    inputId="isAdminRightsEditor"
-                    binary
-                  />
-                  <label for="isAdminRightsEditor">Редактирование прав администраторов</label>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Checkbox
-                    v-model="slotProps.data.rights.is_control_panel_user"
-                    inputId="isControlPanelUser"
-                    binary
-                  />
-                  <label for="isControlPanelUser">Доступ к панели управления</label>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Checkbox
-                    v-model="slotProps.data.rights.is_verified"
-                    inputId="isVerified"
-                    binary
-                  />
-                  <label for="isVerified">Верифицирован</label>
-                </div>
-              </div>
+              <span>Тариф</span>
             </div>
           </template>
         </DataTable>
       </template>
     </Card>
+    <Dialog
+      v-model:visible="rightsModalVisible"
+      modal
+      :header="`Настройка прав ${userInEdit?.telegram_username || 'Unknown'}`"
+    >
+      <div
+        v-for="userRight in Object.keys(userInEdit?.rights || {})"
+        :key="userRight"
+        class="flex items-center gap-2"
+      >
+        <Checkbox v-model="checkedRights" :inputId="userRight" :value="userRight" />
+        <label :for="userRight">{{ userPermissions[userRight] || 'Unknown' }}</label>
+      </div>
+      <div class="flex justify-end">
+        <Button @click="saveRightsModal">Сохранить</Button>
+      </div>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { User } from '@/api/user/schema';
-import { userAll } from '@/api/user/service';
-import { onMounted, ref } from 'vue';
+import { UserPatchRqSchema, type User, type UserRights } from '@/api/user/schema';
+import { userAll, userPatch } from '@/api/user/service';
+import useErrorToast from '@/composables/useErrorToast';
+import userPermissions from '@/utils/const/userPermissions';
+import { isAxiosError } from 'axios';
+import { onMounted, ref, shallowRef } from 'vue';
+
+const errorToast = useErrorToast();
 
 const users = ref<User[]>([]);
 const expanded = ref<Record<string, boolean>>({});
+
+const rightsModalVisible = shallowRef(false);
+const userInEdit = ref<User | null>(null);
+const checkedRights = ref<string[]>([]);
+
+const openRightsModal = (user: User) => {
+  userInEdit.value = user;
+  Object.keys(user.rights).forEach((right) => {
+    if (user.rights[right as keyof UserRights]) {
+      checkedRights.value.push(right);
+    }
+  });
+  rightsModalVisible.value = true;
+};
+
+const saveRightsModal = () => {
+  try {
+    const rights = { ...userInEdit.value!.rights } as UserRights;
+    Object.keys(rights).forEach((right) => {
+      rights[right as keyof UserRights] = checkedRights.value.includes(right);
+    });
+    userPatch(userInEdit.value!.id, UserPatchRqSchema.parse({ rights }));
+    userInEdit.value!.rights = rights;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      errorToast.error(error);
+    } else {
+      throw error;
+    }
+  }
+
+  rightsModalVisible.value = false;
+};
 
 onMounted(async () => {
   await userAll().then((res) => {
     users.value = res;
   });
-  // users.value.push({
-  //   id: "BIBA_BOBA",
-  //   telegram_id: 0,
-  //   telegram_username: '',
-  //   balance: 0,
-  //   created_date: (new Date(0)).toISOString(),
-  //   rights: {
-  //     is_server_editor: false,
-  //     is_transaction_editor: false,
-  //     is_active_period_editor: false,
-  //     is_tariff_editor: false,
-  //     is_member_rights_editor: false,
-  //     is_admin_rights_editor: false,
-  //     is_control_panel_user: false,
-  //     is_verified: false,
-  //   },
-  //   settings: {
-  //     auto_pay: false,
-  //     is_active: false,
-  //     get_traffic_notifications: false,
-  //   },
-  //   tariff: {
-  //     id: "BIBA_BOBA",
-  //     name: '',
-  //     duration: 0,
-  //     price: 0,
-  //     price_of_traffic_reset: 0,
-  //     traffic: 0,
-  //     is_special: false
-  //   }
-  // })
 });
 </script>
