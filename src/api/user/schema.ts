@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { type MessageRs, MessageRsSchema } from '@/api/base/schema';
+import { TariffSchema } from '@/api/tariff/schema';
 
 export const RightsSchema = z.object({
   is_server_editor: z.boolean(),
@@ -18,16 +19,6 @@ export const SettingsSchema = z.object({
   get_traffic_notifications: z.boolean(),
 });
 
-export const TariffSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-  duration: z.number(),
-  price: z.number(),
-  price_of_traffic_reset: z.number(),
-  traffic: z.number(),
-  is_special: z.boolean(),
-});
-
 export const UserSchema = z.object({
   id: z.string().uuid(),
   telegram_id: z.number().int(),
@@ -41,7 +32,6 @@ export const UserSchema = z.object({
 
 export type UserRights = z.infer<typeof RightsSchema>;
 export type UserSettings = z.infer<typeof SettingsSchema>;
-export type UserTariff = z.infer<typeof TariffSchema>;
 export type User = z.infer<typeof UserSchema>;
 
 // response get /user
