@@ -47,7 +47,7 @@
         class="flex items-center gap-2"
       >
         <Checkbox v-model="checkedRights" :inputId="userRight" :value="userRight" />
-        <label :for="userRight">{{ userPermissions[userRight] || 'Unknown' }}</label>
+        <label :for="userRight">{{ userPermissionsLocale[userRight] || 'Unknown' }}</label>
       </div>
       <div class="flex justify-end">
         <Button @click="saveRightsModal">Сохранить</Button>
@@ -62,7 +62,7 @@ import { tariffAll } from '@/api/tariff/service';
 import { UserPatchRqSchema, type User, type UserRights } from '@/api/user/schema';
 import { userAll, userPatch } from '@/api/user/service';
 import useErrorToast from '@/composables/useErrorToast';
-import userPermissions from '@/utils/const/userPermissions';
+import userPermissionsLocale from '@/utils/locale/userPermissionsLocale';
 import { isAxiosError } from 'axios';
 import { onMounted, ref, shallowRef } from 'vue';
 
