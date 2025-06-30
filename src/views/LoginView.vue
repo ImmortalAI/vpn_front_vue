@@ -89,10 +89,10 @@ const countdown = useCountdown(30, {
 
 const sendCodeClick = async () => {
   try {
-    const res = await authTgCode(AuthTgCodeRqSchema.parse({ tg_id: telegramId.value }));
+    const response = await authTgCode(AuthTgCodeRqSchema.parse({ tg_id: telegramId.value }));
     toast.add({
       severity: 'success',
-      summary: res.message,
+      summary: response.message,
       life: 1000,
     });
     codeSended.value = true;
@@ -108,13 +108,13 @@ const sendCodeClick = async () => {
 
 const loginClick = async () => {
   try {
-    const res = await authLogin(
+    const response = await authLogin(
       AuthLoginRqSchema.parse({ tg_id: Number(telegramId.value), tg_code: telegramCode.value }),
     );
     await user.refreshUser();
     toast.add({
       severity: 'success',
-      summary: res.message,
+      summary: response.message,
       life: 1000,
     });
     router.push('/dashboard');

@@ -17,8 +17,8 @@ import {
  */
 export async function userGet(): Promise<UserGetRs> {
   try {
-    const res = await apiClient.get('/user');
-    return UserGetRsSchema.parse(res.data);
+    const response = await apiClient.get('/user');
+    return UserGetRsSchema.parse(response.data);
   } catch (error) {
     throw error;
   }
@@ -34,8 +34,8 @@ export async function userGet(): Promise<UserGetRs> {
  */
 export async function userPatch(userId: string, request: UserPatchRq): Promise<UserPatchRs> {
   try {
-    const res = await apiClient.patch(`/user/${userId}`, request);
-    return UserPatchRsSchema.parse(res.data);
+    const response = await apiClient.patch(`/user/${userId}`, request);
+    return UserPatchRsSchema.parse(response.data);
   } catch (error) {
     throw error;
   }
@@ -49,8 +49,8 @@ export async function userPatch(userId: string, request: UserPatchRq): Promise<U
  */
 export async function userAll(): Promise<UserAllGetRs> {
   try {
-    const res = await apiClient.get('/user/all');
-    return UserAllGetRsSchema.parse(res.data);
+    const response = await apiClient.get('/user/all');
+    return UserAllGetRsSchema.parse(response.data);
   } catch (error) {
     throw error;
   }

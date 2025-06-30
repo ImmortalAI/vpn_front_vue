@@ -10,8 +10,8 @@ export const useUserStore = defineStore('user', () => {
 
   const refreshUser = async () => {
     try {
-      const res = await userGet();
-      user.value = res;
+      const response = await userGet();
+      user.value = response;
     } catch (error) {
       throw error;
     }

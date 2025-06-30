@@ -94,8 +94,8 @@ const saveRightsModal = () => {
 };
 
 onMounted(async () => {
-  await userAll().then((res) => {
-    users.value = res;
+  await userAll().then((response) => {
+    users.value = response;
   });
 });
 </script>
