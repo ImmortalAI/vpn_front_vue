@@ -7,7 +7,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
+      name: 'login',
       component: LoginView,
     },
     {
@@ -28,10 +28,18 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const user = useUserStore();
-  if (to.name !== 'home' && !user.loggedIn) {
-    next({ name: 'home' });
+
+  // Try to refresh the user data if not already logged in
+  if (!user.loggedIn) {
+    await user.refreshUser();
+  }
+
+  if (to.name !== 'login' && !user.loggedIn) {
+    next({ name: 'login' });
+  } else if (to.name === 'login' && user.loggedIn) {
+    next({ name: 'dashboard' });
   } else {
     next();
   }
