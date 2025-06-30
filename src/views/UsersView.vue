@@ -9,6 +9,15 @@
           <Column field="telegram_username" header="Имя пользователя"></Column>
           <Column field="balance" header="Баланс"></Column>
           <Column field="created_date" header="Дата регистрации"></Column>
+          <Column field="tariff" header="Тариф">
+            <template #body="slotProps">
+              <Select
+                @change="changeTariff(slotProps.data.id, $event.value)"
+                :options="tariffs"
+                optionLabel="name"
+              ></Select>
+            </template>
+          </Column>
           <Column field="rights" header="Права">
             <template #body="slotProps">
               <Button
@@ -48,6 +57,8 @@
 </template>
 
 <script setup lang="ts">
+import type { Tariff } from '@/api/tariff/schema';
+import { tariffAll } from '@/api/tariff/service';
 import { UserPatchRqSchema, type User, type UserRights } from '@/api/user/schema';
 import { userAll, userPatch } from '@/api/user/service';
 import useErrorToast from '@/composables/useErrorToast';
@@ -93,9 +104,26 @@ const saveRightsModal = () => {
   rightsModalVisible.value = false;
 };
 
+const tariffs = ref<Tariff[]>([]);
+
+const changeTariff = (userId: string, tariff: Tariff) => {
+  try {
+    userPatch(userId, UserPatchRqSchema.parse({ tariff_id: tariff.id }));
+  } catch (error) {
+    if (isAxiosError(error)) {
+      errorToast.error(error);
+    } else {
+      throw error;
+    }
+  }
+};
+
 onMounted(async () => {
   await userAll().then((response) => {
     users.value = response;
+  });
+  await tariffAll().then((response) => {
+    tariffs.value = response;
   });
 });
 </script>
