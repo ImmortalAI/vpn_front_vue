@@ -7,7 +7,7 @@ import {
   AuthLoginRsSchema,
   AuthTgCodeRsSchema,
   type AuthLoginRs,
-} from './schema';
+} from '@/api/auth/schema';
 
 /**
  * Send a Telegram code to the user.

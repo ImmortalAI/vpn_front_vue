@@ -5,7 +5,7 @@ import {
   type TransactionAllGetRs,
   type TransactionPostRq,
   type TransactionPostRs,
-} from './schema';
+} from '@/api/transaction/schema';
 
 /**
  * Creates a new transaction with the given data.

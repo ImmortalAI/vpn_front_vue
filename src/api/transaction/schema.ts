@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MessageRsSchema, type MessageRs } from '../base/schema';
+import { MessageRsSchema, type MessageRs } from '@/api/base/schema';
 
 export const TransactionTypeSchema = z.enum(['refund', 'replenishment', 'withdrawal']);
 

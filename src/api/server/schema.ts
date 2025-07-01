@@ -1,5 +1,5 @@
 import z from 'zod';
-import { MessageRsSchema, type MessageRs } from '../base/schema';
+import { MessageRsSchema, type MessageRs } from '@/api/base/schema';
 
 export const ServerSchema = z.object({
   id: z.string().uuid(),

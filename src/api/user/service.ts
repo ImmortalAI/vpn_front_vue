@@ -7,7 +7,7 @@ import {
   type UserGetRs,
   type UserPatchRq,
   type UserPatchRs,
-} from './schema';
+} from '@/api/user/schema';
 
 /**
  * Get the data of the current authorized user

@@ -12,7 +12,7 @@ import {
   type TariffPatchRs,
   type TariffPostRq,
   type TariffPostRs,
-} from './schema';
+} from '@/api/tariff/schema';
 
 /**
  * Get the list of all tariffs with their data.

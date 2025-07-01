@@ -8,7 +8,7 @@ import {
   type ServerPatchRs,
   type ServerPostRq,
   type ServerPostRs,
-} from './schema';
+} from '@/api/server/schema';
 
 /**
  * Fetches the list of all servers and returns their data.

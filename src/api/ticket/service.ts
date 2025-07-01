@@ -9,7 +9,7 @@ import {
   type TicketGetRs,
   type TicketNewMessageRq,
   type TicketNewMessageRs,
-} from './schema';
+} from '@/api/ticket/schema';
 
 /**
  * Get the list of all tickets and return their data.
