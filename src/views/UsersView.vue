@@ -3,8 +3,13 @@
     <Card>
       <template #title>Пользователи</template>
       <template #content>
-        <DataTable v-model:expandedRows="expanded" editMode="cell" :value="users" dataKey="id"
-          @cellEditComplete="updateDataTable">
+        <DataTable
+          v-model:expandedRows="expanded"
+          editMode="cell"
+          :value="users"
+          dataKey="id"
+          @cellEditComplete="updateDataTable"
+        >
           <Column expander style="width: 5rem" />
           <Column field="telegram_id" header="Telegram ID">
             <template #editor="{ data, field }">
@@ -16,14 +21,21 @@
           <Column field="created_date" header="Дата регистрации"></Column>
           <Column field="tariff" header="Тариф">
             <template #body="slotProps">
-              <Select @change="changeTariff(slotProps.data.id, $event.value)" :options="tariffs"
-                optionLabel="name"></Select>
+              <Select
+                @change="changeTariff(slotProps.data.id, $event.value)"
+                :options="tariffs"
+                optionLabel="name"
+              ></Select>
             </template>
           </Column>
           <Column field="rights" header="Права">
             <template #body="slotProps">
-              <Button icon="pi pi-pencil" severity="secondary" rounded
-                @click="openRightsModal(slotProps.data as User)" />
+              <Button
+                icon="pi pi-pencil"
+                severity="secondary"
+                rounded
+                @click="openRightsModal(slotProps.data as User)"
+              />
             </template>
           </Column>
           <template #expansion>
@@ -34,9 +46,16 @@
         </DataTable>
       </template>
     </Card>
-    <Dialog v-model:visible="rightsModalVisible" modal
-      :header="`Настройка прав ${userInEdit?.telegram_username || 'Unknown'}`">
-      <div v-for="userRight in Object.keys(userInEdit?.rights || {})" :key="userRight" class="flex items-center gap-2">
+    <Dialog
+      v-model:visible="rightsModalVisible"
+      modal
+      :header="`Настройка прав ${userInEdit?.telegram_username || 'Unknown'}`"
+    >
+      <div
+        v-for="userRight in Object.keys(userInEdit?.rights || {})"
+        :key="userRight"
+        class="flex items-center gap-2"
+      >
         <Checkbox v-model="checkedRights" :inputId="userRight" :value="userRight" />
         <label :for="userRight">{{ userPermissionsLocale[userRight] || 'Unknown' }}</label>
       </div>
@@ -122,7 +141,7 @@ const updateDataTable = (event: DataTableCellEditCompleteEvent<User>) => {
       throw error;
     }
   }
-}
+};
 
 onMounted(async () => {
   await userAll().then((response) => {

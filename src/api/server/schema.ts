@@ -10,8 +10,8 @@ export const ServerSchema = z.object({
   display_name: z.string(),
   login: z.string(),
   password: z.string(),
-  starting_date: z.string().datetime({ local: true }),
-  closing_date: z.string().datetime({ local: true }),
+  starting_date: z.coerce.date(),
+  closing_date: z.coerce.date(),
 });
 
 export type Server = z.infer<typeof ServerSchema>;
@@ -31,8 +31,8 @@ export const ServerPostRqSchema = z.object({
   display_name: z.string(),
   login: z.string(),
   password: z.string(),
-  starting_date: z.string().datetime({ local: true }),
-  closing_date: z.string().datetime({ local: true }),
+  starting_date: z.coerce.date(),
+  closing_date: z.coerce.date(),
 });
 
 export type ServerPostRq = z.infer<typeof ServerPostRqSchema>;
@@ -49,8 +49,8 @@ export const ServerPatchRqSchema = z.object({
   display_name: z.string().optional(),
   login: z.string().optional(),
   password: z.string().optional(),
-  starting_date: z.string().datetime({ local: true }).optional(),
-  closing_date: z.string().datetime({ local: true }).optional(),
+  starting_date: z.coerce.date().optional(),
+  closing_date: z.coerce.date().optional(),
 });
 
 export type ServerPatchRq = z.infer<typeof ServerPatchRqSchema>;

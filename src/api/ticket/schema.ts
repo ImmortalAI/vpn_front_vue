@@ -4,7 +4,7 @@ import { MessageRsSchema, type MessageRs } from '../base/schema';
 export const TicketMessageSchema = z.object({
   id: z.string().uuid(),
   message: z.string(),
-  date: z.string().datetime({ local: true }),
+  date: z.coerce.date(),
 });
 
 export type TicketMessage = z.infer<typeof TicketMessageSchema>;
@@ -13,7 +13,7 @@ export const TicketSchema = z.object({
   id: z.string().uuid(),
   user_id: z.string().uuid(),
   title: z.string(),
-  opening_data: z.string().datetime({ local: true }),
+  opening_data: z.coerce.date(),
   is_open: z.boolean(),
   messages: z.array(TicketMessageSchema),
 });

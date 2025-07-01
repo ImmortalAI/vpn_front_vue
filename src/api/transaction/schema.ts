@@ -9,7 +9,7 @@ export const TransactionSchema = z.object({
   user_id: z.string().uuid(),
   amount: z.number(),
   transaction_type: TransactionTypeSchema,
-  date: z.string().datetime({ local: true }),
+  date: z.coerce.date(),
 });
 
 export type Transaction = z.infer<typeof TransactionSchema>;
