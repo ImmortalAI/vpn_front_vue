@@ -3,29 +3,27 @@
     <Card>
       <template #title>Пользователи</template>
       <template #content>
-        <DataTable v-model:expandedRows="expanded" :value="users" dataKey="id">
+        <DataTable v-model:expandedRows="expanded" editMode="cell" :value="users" dataKey="id"
+          @cellEditComplete="updateDataTable">
           <Column expander style="width: 5rem" />
-          <Column field="telegram_id" header="Telegram ID"></Column>
+          <Column field="telegram_id" header="Telegram ID">
+            <template #editor="{ data, field }">
+              <InputNumber :useGrouping="false" v-model="data[field]" :min="0"></InputNumber>
+            </template>
+          </Column>
           <Column field="telegram_username" header="Имя пользователя"></Column>
           <Column field="balance" header="Баланс"></Column>
           <Column field="created_date" header="Дата регистрации"></Column>
           <Column field="tariff" header="Тариф">
             <template #body="slotProps">
-              <Select
-                @change="changeTariff(slotProps.data.id, $event.value)"
-                :options="tariffs"
-                optionLabel="name"
-              ></Select>
+              <Select @change="changeTariff(slotProps.data.id, $event.value)" :options="tariffs"
+                optionLabel="name"></Select>
             </template>
           </Column>
           <Column field="rights" header="Права">
             <template #body="slotProps">
-              <Button
-                icon="pi pi-pencil"
-                severity="secondary"
-                rounded
-                @click="openRightsModal(slotProps.data as User)"
-              />
+              <Button icon="pi pi-pencil" severity="secondary" rounded
+                @click="openRightsModal(slotProps.data as User)" />
             </template>
           </Column>
           <template #expansion>
@@ -36,16 +34,9 @@
         </DataTable>
       </template>
     </Card>
-    <Dialog
-      v-model:visible="rightsModalVisible"
-      modal
-      :header="`Настройка прав ${userInEdit?.telegram_username || 'Unknown'}`"
-    >
-      <div
-        v-for="userRight in Object.keys(userInEdit?.rights || {})"
-        :key="userRight"
-        class="flex items-center gap-2"
-      >
+    <Dialog v-model:visible="rightsModalVisible" modal
+      :header="`Настройка прав ${userInEdit?.telegram_username || 'Unknown'}`">
+      <div v-for="userRight in Object.keys(userInEdit?.rights || {})" :key="userRight" class="flex items-center gap-2">
         <Checkbox v-model="checkedRights" :inputId="userRight" :value="userRight" />
         <label :for="userRight">{{ userPermissionsLocale[userRight] || 'Unknown' }}</label>
       </div>
@@ -64,6 +55,7 @@ import { userAll, userPatch } from '@/api/user/service';
 import useErrorToast from '@/composables/useErrorToast';
 import userPermissionsLocale from '@/utils/locale/userPermissionsLocale';
 import { isAxiosError } from 'axios';
+import type { DataTableCellEditCompleteEvent } from 'primevue/datatable';
 import { onMounted, ref, shallowRef } from 'vue';
 
 const errorToast = useErrorToast();
@@ -117,6 +109,20 @@ const changeTariff = (userId: string, tariff: Tariff) => {
     }
   }
 };
+
+const updateDataTable = (event: DataTableCellEditCompleteEvent<User>) => {
+  try {
+    userPatch(event.data.id, UserPatchRqSchema.parse({ telegram_id: event.newData.telegram_id }));
+    users.value.find((user) => user.id === event.data.id)!.telegram_id = event.newData.telegram_id;
+  } catch (error) {
+    event.originalEvent.preventDefault();
+    if (isAxiosError(error)) {
+      errorToast.error(error);
+    } else {
+      throw error;
+    }
+  }
+}
 
 onMounted(async () => {
   await userAll().then((response) => {
