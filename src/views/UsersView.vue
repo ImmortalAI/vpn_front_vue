@@ -138,6 +138,7 @@ const changeTariff = (userId: string, tariff: Tariff) => {
 
 const updateDataTable = (event: DataTableCellEditCompleteEvent<User>) => {
   try {
+    if (event.data.telegram_id === event.newData.telegram_id) return;
     userPatch(event.data.id, UserPatchRqSchema.parse({ telegram_id: event.newData.telegram_id }));
     users.value.find((user) => user.id === event.data.id)!.telegram_id = event.newData.telegram_id;
   } catch (error) {
