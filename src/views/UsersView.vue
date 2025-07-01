@@ -26,6 +26,7 @@
           <Column field="tariff" header="Тариф">
             <template #body="slotProps">
               <Select
+                v-model="choosenTariff[slotProps.data.id]"
                 @change="changeTariff(slotProps.data.id, $event.value)"
                 :options="tariffs"
                 optionLabel="name"
@@ -121,6 +122,7 @@ const saveRightsModal = () => {
 };
 
 const tariffs = ref<Tariff[]>([]);
+const choosenTariff = ref<Record<string, Tariff>>({});
 
 const changeTariff = (userId: string, tariff: Tariff) => {
   try {
@@ -154,6 +156,9 @@ onMounted(async () => {
   });
   await tariffAll().then((response) => {
     tariffs.value = response;
+  });
+  users.value.forEach((user) => {
+    choosenTariff.value[user.id] = tariffs.value.find((tariff) => tariff.id === user.tariff.id)!;
   });
 });
 </script>
