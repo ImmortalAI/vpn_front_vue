@@ -18,7 +18,11 @@
           </Column>
           <Column field="telegram_username" header="Имя пользователя"></Column>
           <Column field="balance" header="Баланс"></Column>
-          <Column field="created_date" header="Дата регистрации"></Column>
+          <Column field="created_date" header="Дата регистрации">
+            <template #body="slotProps">
+              {{ formatRuDateTime(slotProps.data.created_date) }}
+            </template>
+          </Column>
           <Column field="tariff" header="Тариф">
             <template #body="slotProps">
               <Select
@@ -72,6 +76,7 @@ import { tariffAll } from '@/api/tariff/service';
 import { UserPatchRqSchema, type User, type UserRights } from '@/api/user/schema';
 import { userAll, userPatch } from '@/api/user/service';
 import useErrorToast from '@/composables/useErrorToast';
+import formatRuDateTime from '@/utils/formatRuDateTime';
 import userPermissionsLocale from '@/utils/locale/userPermissionsLocale';
 import { isAxiosError } from 'axios';
 import type { DataTableCellEditCompleteEvent } from 'primevue/datatable';
