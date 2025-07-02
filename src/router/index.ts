@@ -33,7 +33,11 @@ router.beforeEach(async (to, from, next) => {
 
   // Try to refresh the user data if not already logged in
   if (!user.loggedIn) {
-    await user.refreshUser();
+    try {
+      await user.refreshUser();
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   if (to.name !== 'login' && !user.loggedIn) {
