@@ -1,6 +1,5 @@
 import apiClient from '@/utils/apiClient';
 import {
-  // ts-ignore
   type AuthTgCodeRs,
   type AuthLoginRq,
   type AuthTgCodeRq,
