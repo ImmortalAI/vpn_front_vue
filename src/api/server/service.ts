@@ -1,25 +1,28 @@
 import apiClient from '@/utils/apiClient';
 import {
-  ServerAllGetRsSchema,
+  ServerGetRsSchema,
+  ServerPatchRqSchema,
   ServerPatchRsSchema,
+  ServerPostRqSchema,
   ServerPostRsSchema,
-  type ServerAllGetRs,
+  type ServerGetRs,
   type ServerPatchRq,
   type ServerPatchRs,
   type ServerPostRq,
   type ServerPostRs,
 } from '@/api/server/schema';
+import { UuidSchema } from '@/api/base/schema';
 
 /**
  * Fetches the list of all servers and returns their data.
  *
- * @returns {Promise<ServerAllGetRs>} An array of server data.
+ * @returns {Promise<ServerGetRs>} An array of server data.
  * @throws If the API request fails or the response data cannot be parsed to the expected schema.
  */
-export async function serverAll(): Promise<ServerAllGetRs> {
+export async function serverGet(): Promise<ServerGetRs> {
   try {
-    const response = await apiClient.get('/server/all');
-    return ServerAllGetRsSchema.parse(response.data);
+    const response = await apiClient.get('/servers');
+    return ServerGetRsSchema.parse(response.data);
   } catch (error) {
     throw error;
   }
@@ -34,7 +37,8 @@ export async function serverAll(): Promise<ServerAllGetRs> {
  */
 export async function serverPost(data: ServerPostRq): Promise<ServerPostRs> {
   try {
-    const response = await apiClient.post('/server', data);
+    ServerPostRqSchema.parse(data);
+    const response = await apiClient.post('/servers', data);
     return ServerPostRsSchema.parse(response.data);
   } catch (error) {
     throw error;
@@ -49,12 +53,14 @@ export async function serverPost(data: ServerPostRq): Promise<ServerPostRs> {
  * @returns {Promise<ServerPatchRs>} The response message with the updated server data.
  * @throws If the API request fails or the response data cannot be parsed to the expected schema.
  */
-export async function serverPatch(
+export async function serverIdPatch(
   serverID: string,
   newData: ServerPatchRq,
 ): Promise<ServerPatchRs> {
   try {
-    const response = await apiClient.patch(`/server/${serverID}`, newData);
+    UuidSchema.parse(serverID);
+    ServerPatchRqSchema.parse(newData);
+    const response = await apiClient.patch(`/servers/${serverID}`, newData);
     return ServerPatchRsSchema.parse(response.data);
   } catch (error) {
     throw error;

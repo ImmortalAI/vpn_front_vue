@@ -3,6 +3,7 @@ import {
   TicketCloseTicketPatchRsSchema,
   TicketGetByIdRsSchema,
   TicketGetRsSchema,
+  TicketNewMessageRqSchema,
   TicketNewMessageRsSchema,
   type TicketCloseTicketPatchRs,
   type TicketGetByIdRs,
@@ -10,6 +11,7 @@ import {
   type TicketNewMessageRq,
   type TicketNewMessageRs,
 } from '@/api/ticket/schema';
+import { UuidSchema, type Uuid } from '@/api/base/schema';
 
 /**
  * Get the list of all tickets and return their data.
@@ -19,7 +21,7 @@ import {
  */
 export async function ticketGet(): Promise<TicketGetRs> {
   try {
-    const response = await apiClient.get('/ticket');
+    const response = await apiClient.get('/tickets');
     return TicketGetRsSchema.parse(response.data);
   } catch (error) {
     throw error;
@@ -35,7 +37,8 @@ export async function ticketGet(): Promise<TicketGetRs> {
  */
 export async function ticketGetById(ticketID: string): Promise<TicketGetByIdRs> {
   try {
-    const response = await apiClient.get(`/ticket/${ticketID}`);
+    UuidSchema.parse(ticketID);
+    const response = await apiClient.get(`/tickets/${ticketID}`);
     return TicketGetByIdRsSchema.parse(response.data);
   } catch (error) {
     throw error;
@@ -55,7 +58,9 @@ export async function ticketNewMessage(
   message: TicketNewMessageRq,
 ): Promise<TicketNewMessageRs> {
   try {
-    const response = await apiClient.post(`/ticket/new_message/${ticketID}`, message);
+    UuidSchema.parse(ticketID);
+    TicketNewMessageRqSchema.parse(message);
+    const response = await apiClient.post(`/tickets/${ticketID}/messages`, message);
     return TicketNewMessageRsSchema.parse(response.data);
   } catch (error) {
     throw error;
@@ -65,13 +70,14 @@ export async function ticketNewMessage(
 /**
  * Close a specific ticket.
  *
- * @param {string} ticketID - The UUID of the ticket to close.
+ * @param {Uuid} ticketID - The UUID of the ticket to close.
  * @returns {Promise<TicketCloseTicketPatchRs>} The response data with status message.
  * @throws If the API request fails or the response data cannot be parsed to the expected schema.
  */
-export async function ticketCloseTicket(ticketID: string): Promise<TicketCloseTicketPatchRs> {
+export async function ticketCloseTicket(ticketID: Uuid): Promise<TicketCloseTicketPatchRs> {
   try {
-    const response = await apiClient.patch(`/ticket/close_ticket/${ticketID}`);
+    UuidSchema.parse(ticketID);
+    const response = await apiClient.patch(`/tickets/${ticketID}/close`);
     return TicketCloseTicketPatchRsSchema.parse(response.data);
   } catch (error) {
     throw error;

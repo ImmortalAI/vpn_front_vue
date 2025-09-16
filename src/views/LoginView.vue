@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { z } from 'zod';
+import * as z from 'zod';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { authLogin, authTgCode } from '@/api/auth/service';
 import { AuthLoginRqSchema, AuthTgCodeRqSchema } from '@/api/auth/schema';

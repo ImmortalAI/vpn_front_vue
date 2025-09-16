@@ -1,9 +1,10 @@
-import { z } from 'zod';
+import * as z from 'zod';
 import { type MessageRs, MessageRsSchema } from '@/api/base/schema';
 import { TariffSchema } from '@/api/tariff/schema';
 
-export const RightsSchema = z.object({
+export const UserRightsSchema = z.object({
   is_server_editor: z.boolean(),
+  is_user_editor: z.boolean(),
   is_transaction_editor: z.boolean(),
   is_active_period_editor: z.boolean(),
   is_tariff_editor: z.boolean(),
@@ -13,43 +14,63 @@ export const RightsSchema = z.object({
   is_verified: z.boolean(),
 });
 
-export const SettingsSchema = z.object({
+export const UserSettingsSchema = z.object({
   auto_pay: z.boolean(),
   is_active: z.boolean(),
   get_traffic_notifications: z.boolean(),
 });
 
 export const UserSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   telegram_id: z.number().int(),
   telegram_username: z.string(),
+  telegram_language_code: z.string(),
+  description: z.string(),
   balance: z.number(),
   created_date: z.coerce.date(),
-  rights: RightsSchema,
-  settings: SettingsSchema,
+  rights: UserRightsSchema,
+  settings: UserSettingsSchema,
   tariff: TariffSchema,
 });
 
-export type UserRights = z.infer<typeof RightsSchema>;
-export type UserSettings = z.infer<typeof SettingsSchema>;
+export type UserRights = z.infer<typeof UserRightsSchema>;
+export type UserSettings = z.infer<typeof UserSettingsSchema>;
 export type User = z.infer<typeof UserSchema>;
 
-// response get /user
-export { UserSchema as UserGetRsSchema, type User as UserGetRs };
+// request get /users
+export const UserGetRqSchema = z
+  .object({
+    offset: z.number().int().optional(),
+    limit: z.number().int().optional(),
+  })
+  .optional();
 
-// request patch /user/{user_id}
+export type UserGetRq = z.infer<typeof UserGetRqSchema>;
+
+// response get /users
+export const UserGetRsSchema = z.array(UserSchema);
+
+export type UserGetRs = z.infer<typeof UserGetRsSchema>;
+
+// response get /users/count
+
+export const UserCountRsSchema = z.number().int();
+
+export type UserCountRs = z.infer<typeof UserCountRsSchema>;
+
+// request patch /users/{user_id}
 export const UserPatchRqSchema = z.object({
   telegram_id: z.number().int().optional(),
-  tariff_id: z.string().uuid().optional(),
-  rights: RightsSchema.optional(),
-  settings: SettingsSchema.optional(),
+  tariff_id: z.uuid().optional(),
+  description: z.string().optional(),
+  rights: UserRightsSchema.optional(),
+  settings: UserSettingsSchema.optional(),
 });
 
 export type UserPatchRq = z.infer<typeof UserPatchRqSchema>;
 
+// response patch /users/{user_id}
 export { MessageRsSchema as UserPatchRsSchema, type MessageRs as UserPatchRs };
 
-// response get /user/all
-export const UserAllGetRsSchema = z.array(UserSchema);
-
-export type UserAllGetRs = z.infer<typeof UserAllGetRsSchema>;
+// response get /users/me
+export { UserSchema as UserSelfGetRsSchema, type User as UserSelfGetRs };

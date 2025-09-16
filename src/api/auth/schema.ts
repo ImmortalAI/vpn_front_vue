@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 import { type MessageRs, MessageRsSchema } from '@/api/base/schema';
 
 // request post /auth/tg_code
@@ -19,3 +19,7 @@ export const AuthLoginRqSchema = z.object({
 export type AuthLoginRq = z.infer<typeof AuthLoginRqSchema>;
 
 export { MessageRsSchema as AuthLoginRsSchema, type MessageRs as AuthLoginRs };
+
+export { MessageRsSchema as AuthLogoutRsSchema, type MessageRs as AuthLogoutRs };
+
+export { MessageRsSchema as AuthRefreshRsSchema, type MessageRs as AuthRefreshRs };

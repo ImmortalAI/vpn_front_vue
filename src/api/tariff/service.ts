@@ -3,7 +3,9 @@ import {
   TariffAllGetRsSchema,
   TariffDeleteRsSchema,
   TariffGetRsSchema,
+  TariffPatchRqSchema,
   TariffPatchRsSchema,
+  TariffPostRqSchema,
   TariffPostRsSchema,
   type TariffAllGetRs,
   type TariffDeleteRs,
@@ -13,6 +15,7 @@ import {
   type TariffPostRq,
   type TariffPostRs,
 } from '@/api/tariff/schema';
+import { UuidSchema } from '../base/schema';
 
 /**
  * Get the list of all tariffs with their data.
@@ -22,7 +25,7 @@ import {
  */
 export async function tariffAll(): Promise<TariffAllGetRs> {
   try {
-    const response = await apiClient.get('/tariff/all');
+    const response = await apiClient.get('/tariffs');
     return TariffAllGetRsSchema.parse(response.data);
   } catch (error) {
     throw error;
@@ -38,7 +41,8 @@ export async function tariffAll(): Promise<TariffAllGetRs> {
  */
 export async function tariffGet(tariffId: string): Promise<TariffGetRs> {
   try {
-    const response = await apiClient.get(`/tariff/${tariffId}`);
+    UuidSchema.parse(tariffId);
+    const response = await apiClient.get(`/tariffs/${tariffId}`);
     return TariffGetRsSchema.parse(response.data);
   } catch (error) {
     throw error;
@@ -54,7 +58,8 @@ export async function tariffGet(tariffId: string): Promise<TariffGetRs> {
  */
 export async function tariffPost(request: TariffPostRq): Promise<TariffPostRs> {
   try {
-    const response = await apiClient.post('/tariff', request);
+    TariffPostRqSchema.parse(request);
+    const response = await apiClient.post('/tariffs', request);
     return TariffPostRsSchema.parse(response.data);
   } catch (error) {
     throw error;
@@ -74,7 +79,9 @@ export async function tariffPatch(
   request: TariffPatchRq,
 ): Promise<TariffPatchRs> {
   try {
-    const response = await apiClient.patch(`/tariff/${tariffId}`, request);
+    UuidSchema.parse(tariffId);
+    TariffPatchRqSchema.parse(request);
+    const response = await apiClient.patch(`/tariffs/${tariffId}`, request);
     return TariffPatchRsSchema.parse(response.data);
   } catch (error) {
     throw error;
@@ -90,7 +97,8 @@ export async function tariffPatch(
  */
 export async function tariffDelete(tariffId: string): Promise<TariffDeleteRs> {
   try {
-    const response = await apiClient.delete(`/tariff/${tariffId}`);
+    UuidSchema.parse(tariffId);
+    const response = await apiClient.delete(`/tariffs/${tariffId}`);
     return TariffDeleteRsSchema.parse(response.data);
   } catch (error) {
     throw error;
