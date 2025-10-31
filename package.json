@@ -29,6 +29,7 @@
     "zod": "^4.1.8"
   },
   "devDependencies": {
+    "@iconify/vue": "^5.0.0",
     "@primevue/auto-import-resolver": "^4.3.9",
     "@tsconfig/node22": "^22.0.2",
     "@types/jsdom": "^21.1.7",

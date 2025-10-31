@@ -22,13 +22,11 @@ export { TransactionSchema as TransactionPostRqSchema, type Transaction as Trans
 export { MessageRsSchema as TransactionPostRsSchema, type MessageRs as TransactionPostRs };
 
 // request get /transactions
-export const TransactionGetRqSchema = z
-  .object({
-    user_id: z.uuid().optional(),
-    limit: z.number().int().optional(),
-    offset: z.number().int().optional(),
-  })
-  .optional();
+export const TransactionGetRqSchema = z.object({
+  user_id: z.uuid().optional(),
+  limit: z.number().int().optional(),
+  offset: z.number().int().optional(),
+});
 
 export type TransactionGetRq = z.infer<typeof TransactionGetRqSchema>;
 
@@ -38,11 +36,9 @@ export const TransactionAllGetRsSchema = z.array(TransactionSchema);
 export type TransactionAllGetRs = z.infer<typeof TransactionAllGetRsSchema>;
 
 // request get /transactions/count
-export const TransactionCountRqSchema = z
-  .object({
-    user_id: z.uuid().optional(),
-  })
-  .optional();
+export const TransactionCountRqSchema = z.object({
+  user_id: z.uuid().optional(),
+});
 
 export type TransactionCountRq = z.infer<typeof TransactionCountRqSchema>;
 

@@ -38,12 +38,10 @@ export type UserSettings = z.infer<typeof UserSettingsSchema>;
 export type User = z.infer<typeof UserSchema>;
 
 // request get /users
-export const UserGetRqSchema = z
-  .object({
-    offset: z.number().int().optional(),
-    limit: z.number().int().optional(),
-  })
-  .optional();
+export const UserGetRqSchema = z.object({
+  offset: z.number().int().optional(),
+  limit: z.number().int().optional(),
+});
 
 export type UserGetRq = z.infer<typeof UserGetRqSchema>;
 
