@@ -1,3 +1,4 @@
+// #region imports
 import apiClient from '@/utils/apiClient';
 import {
   type AuthTgCodeRs,
@@ -13,6 +14,7 @@ import {
   AuthTgCodeRqSchema,
   AuthLoginRqSchema,
 } from '@/api/auth/schema';
+// #endregion
 
 /**
  * Send a Telegram code to the user.

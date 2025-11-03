@@ -1,6 +1,8 @@
+// #region imports
 import * as z from 'zod';
 import { type MessageRs, MessageRsSchema } from '@/api/base/schema';
 import { TariffSchema } from '@/api/tariff/schema';
+// #endregion
 
 export const UserRightsSchema = z.object({
   is_server_editor: z.boolean(),
@@ -69,6 +71,16 @@ export type UserPatchRq = z.infer<typeof UserPatchRqSchema>;
 
 // response patch /users/{user_id}
 export { MessageRsSchema as UserPatchRsSchema, type MessageRs as UserPatchRs };
+
+// request /users/{user_id}
+export const UserGetByIdRqSchema = z.object({
+  user_id: z.uuid(),
+});
+
+export type UserGetByIdRq = z.infer<typeof UserGetByIdRqSchema>;
+
+// response get /users/{user_id}
+export { UserSchema as UserGetByIdRsSchema, type User as UserGetByIdRs };
 
 // response get /users/me
 export { UserSchema as UserSelfGetRsSchema, type User as UserSelfGetRs };

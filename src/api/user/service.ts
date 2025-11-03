@@ -1,12 +1,17 @@
+// #region imports
 import apiClient from '@/utils/apiClient';
 import {
   UserCountRsSchema,
+  UserGetByIdRqSchema,
+  UserGetByIdRsSchema,
   UserGetRqSchema,
   UserGetRsSchema,
   UserPatchRqSchema,
   UserPatchRsSchema,
   UserSelfGetRsSchema,
   type UserCountRs,
+  type UserGetByIdRq,
+  type UserGetByIdRs,
   type UserGetRq,
   type UserGetRs,
   type UserPatchRq,
@@ -14,6 +19,7 @@ import {
   type UserSelfGetRs,
 } from '@/api/user/schema';
 import { UuidSchema, type Uuid } from '@/api/base/schema';
+// #endregion
 
 /**
  * Get the data of all users.
@@ -54,6 +60,12 @@ export async function userPatch(userId: Uuid, request: UserPatchRq): Promise<Use
   UserPatchRqSchema.parse(request);
   const response = await apiClient.patch(`/users/${userId}`, request);
   return UserPatchRsSchema.parse(response.data);
+}
+
+export async function getUserById(data: UserGetByIdRq): Promise<UserGetByIdRs> {
+  UserGetByIdRqSchema.parse(data);
+  const response = await apiClient.get(`/users/${data.user_id}`);
+  return UserGetByIdRsSchema.parse(response.data);
 }
 
 /**

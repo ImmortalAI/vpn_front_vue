@@ -1,3 +1,4 @@
+// #region imports
 import apiClient from '@/utils/apiClient';
 import {
   NotificationPostRqSchema,
@@ -5,6 +6,7 @@ import {
   type NotificationPostRq,
   type NotificationPostRs,
 } from '@/api/notifications/schema';
+// #endregion
 
 /**
  * Creates a new notification with the given data (with different languages).

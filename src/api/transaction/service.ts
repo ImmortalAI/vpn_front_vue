@@ -1,3 +1,4 @@
+// #region imports
 import apiClient from '@/utils/apiClient';
 import {
   TransactionAllGetRsSchema,
@@ -13,6 +14,7 @@ import {
   type TransactionPostRq,
   type TransactionPostRs,
 } from '@/api/transaction/schema';
+// #endregion
 
 /**
  * Creates a new transaction with the given data.

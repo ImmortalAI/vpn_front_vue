@@ -1,4 +1,6 @@
+// #region imports
 import * as z from 'zod';
+// #endregion
 
 export const MessageRsSchema = z.object({
   message: z.string(),

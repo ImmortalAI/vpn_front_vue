@@ -1,3 +1,4 @@
+// #region imports
 import apiClient from '@/utils/apiClient';
 import {
   TariffAllGetRsSchema,
@@ -16,6 +17,7 @@ import {
   type TariffPostRs,
 } from '@/api/tariff/schema';
 import { UuidSchema } from '../base/schema';
+// #endregion
 
 /**
  * Get the list of all tariffs with their data.

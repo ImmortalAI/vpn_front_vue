@@ -1,5 +1,7 @@
+// #region imports
 import * as z from 'zod';
 import { type MessageRs, MessageRsSchema } from '@/api/base/schema';
+// #endregion
 
 // request post /auth/tg_code
 export const AuthTgCodeRqSchema = z.object({

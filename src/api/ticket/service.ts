@@ -1,3 +1,4 @@
+// #region imports
 import apiClient from '@/utils/apiClient';
 import {
   TicketCloseTicketPatchRsSchema,
@@ -12,6 +13,7 @@ import {
   type TicketNewMessageRs,
 } from '@/api/ticket/schema';
 import { UuidSchema, type Uuid } from '@/api/base/schema';
+// #endregion
 
 /**
  * Get the list of all tickets and return their data.

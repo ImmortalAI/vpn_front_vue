@@ -1,5 +1,7 @@
+// #region imports
 import * as z from 'zod';
 import { MessageRsSchema, type MessageRs } from '@/api/base/schema';
+// #endregion
 
 export const TicketMessageSchema = z.object({
   id: z.uuid(),
