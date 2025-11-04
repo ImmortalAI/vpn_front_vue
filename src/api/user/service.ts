@@ -62,7 +62,14 @@ export async function userPatch(userId: Uuid, request: UserPatchRq): Promise<Use
   return UserPatchRsSchema.parse(response.data);
 }
 
-export async function getUserById(data: UserGetByIdRq): Promise<UserGetByIdRs> {
+/**
+ * Gets the data of a specific user by their UUID.
+ *
+ * @param {UserGetByIdRq} data - The request data containing the user UUID.
+ * @returns {Promise<UserGetByIdRs>} The response data with the user data.
+ * @throws {AxiosError | ZodError} If the request fails.
+ */
+export async function userGetById(data: UserGetByIdRq): Promise<UserGetByIdRs> {
   UserGetByIdRqSchema.parse(data);
   const response = await apiClient.get(`/users/${data.user_id}`);
   return UserGetByIdRsSchema.parse(response.data);

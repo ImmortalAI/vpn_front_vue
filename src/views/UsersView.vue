@@ -21,9 +21,8 @@
           </Column>
           <Column field="tariff" header="Tariff">
             <template #body="slotProps">
-              <Button severity="secondary" rounded @click="console.log(slotProps.data)">
-                <Icon icon="line-md:clipboard-list"></Icon>
-              </Button>
+              <Select v-model="choosenTariff[(slotProps.data as User).id]" :options="tariffs"
+                optionLabel="name"></Select>
             </template>
           </Column>
           <Column field="settings" header="Settings">
@@ -102,7 +101,7 @@
                 <Skeleton width="2rem" height="1rem" />
               </template>
             </Column>
-            <Column field="date" header="Date">
+            <Column field="date" header="Date" sortable>
               <template #loading>
                 <Skeleton width="2rem" height="1rem" />
               </template>
@@ -128,7 +127,7 @@ import { Icon } from '@iconify/vue'
 import type { Tariff } from '@/api/tariff/schema';
 import { tariffAll } from '@/api/tariff/service';
 import { UserPatchRqSchema, type User, type UserRights, type UserSettings } from '@/api/user/schema';
-import { userGet, userPatch } from '@/api/user/service';
+import { userGet, userGetById, userPatch } from '@/api/user/service';
 import useErrorToast from '@/composables/useErrorToast';
 import userPermissionsLocale from '@/utils/locale/userPermissionsLocale';
 import { isAxiosError } from 'axios';
@@ -153,6 +152,29 @@ const errorToast = useErrorToast();
 
 const users = ref<User[]>([]);
 const userInEdit = ref<User | null>(null);
+
+const updateUserInEdit = async () => {
+  if (!userInEdit.value) return;
+
+  await userGetById({ user_id: userInEdit.value.id }).then((user) => {
+    const index = users.value.indexOf(userInEdit.value!);
+
+    if (index === -1) {
+      console.error('User in edit not found in the list');
+      return;
+    }
+
+    users.value[index] = user;
+    userInEdit.value = user;
+  }).catch((error) => {
+    if (isAxiosError(error)) {
+      errorToast.error(error);
+    }
+    else {
+      throw error;
+    }
+  });
+}
 
 // #endregion
 
@@ -230,7 +252,7 @@ const saveSettingsModal = () => {
 
 // #endregion
 
-// #region User Settings Modal
+// #region User Transactions Modal
 
 const maxTransactionRows = 5;
 const balanceModalVisible = shallowRef(false);
@@ -285,7 +307,9 @@ const onAddNewTransaction = async () => {
     totalTransactions.value = await transactionCount({
       user_id: userInEdit.value!.id
     });
-    loadTransactions();
+    await loadTransactions();
+
+    await updateUserInEdit();
   } catch (error) {
     if (isAxiosError(error)) {
       errorToast.error(error);
@@ -297,10 +321,12 @@ const onAddNewTransaction = async () => {
 
 // #endregion
 
-// const tariffModalVisible = shallowRef(false);
+// #region User Transactions
 
 const tariffs = ref<Tariff[]>([]);
 const choosenTariff = ref<Record<string, Tariff>>({});
+
+// #endregion
 
 const updateDataTable = (event: DataTableCellEditCompleteEvent<User>) => {
   try {
