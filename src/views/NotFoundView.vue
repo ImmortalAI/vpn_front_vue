@@ -5,7 +5,8 @@
     {{
       typeof route.params.pathMatch === 'string'
         ? route.params.pathMatch
-        : route.params.pathMatch.join('/')
+        : typeof route.params.pathMatch === 'object' ?
+          route.params.pathMatch.join('/') : 'UNKNOWN'
     }}
   </p>
 </template>
