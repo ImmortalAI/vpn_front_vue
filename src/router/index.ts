@@ -9,21 +9,41 @@ const router = createRouter({
       path: '/',
       name: 'login',
       component: LoginView,
+      meta: {
+        canRedirectHome: false,
+      },
     },
     {
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('@/views/DashboardView.vue'),
+      meta: {
+        canRedirectHome: false,
+      },
     },
     {
       path: '/users',
       name: 'users',
       component: () => import('@/views/UsersView.vue'),
+      meta: {
+        canRedirectHome: true,
+      },
+    },
+    {
+      path: '/tariffs',
+      name: 'tariffs',
+      component: () => import('@/views/TariffsView.vue'),
+      meta: {
+        canRedirectHome: true,
+      },
     },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue'),
+      meta: {
+        canRedirectHome: true,
+      },
     },
   ],
 });
