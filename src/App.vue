@@ -7,8 +7,12 @@
 
   <RouterView />
 
-  <Button icon="pi pi-chevron-left" @click="router.push({ name: 'dashboard' })" v-if="route.meta.canRedirectHome"
-    class="absolute! bottom-8 right-8" />
+  <Button
+    icon="pi pi-chevron-left"
+    @click="router.push({ name: 'dashboard' })"
+    v-if="route.meta.canRedirectHome"
+    class="absolute! bottom-8 right-8"
+  />
   <Toast position="bottom-right" />
 </template>
 

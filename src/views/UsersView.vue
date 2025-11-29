@@ -14,20 +14,31 @@
           <Column field="telegram_username" header="TG Username"></Column>
           <Column field="balance" header="Balance">
             <template #body="slotProps">
-              <Button severity="secondary" rounded @click="openBalanceModal(slotProps.data as User)">
+              <Button
+                severity="secondary"
+                rounded
+                @click="openBalanceModal(slotProps.data as User)"
+              >
                 <Icon icon="line-md:clipboard-list"></Icon>
               </Button>
             </template>
           </Column>
           <Column field="tariff" header="Tariff">
             <template #body="slotProps">
-              <Select v-model="choosenTariff[(slotProps.data as User).id]" :options="tariffs"
-                optionLabel="name"></Select>
+              <Select
+                v-model="chosenTariff[(slotProps.data as User).id]"
+                :options="tariffs"
+                optionLabel="name"
+              ></Select>
             </template>
           </Column>
           <Column field="settings" header="Settings">
             <template #body="slotProps">
-              <Button severity="secondary" rounded @click="openSettingsModal(slotProps.data as User)">
+              <Button
+                severity="secondary"
+                rounded
+                @click="openSettingsModal(slotProps.data as User)"
+              >
                 <Icon icon="line-md:cog-loop"></Icon>
               </Button>
             </template>
@@ -42,9 +53,16 @@
         </DataTable>
       </template>
     </Card>
-    <Dialog v-model:visible="rightsModalVisible" modal
-      :header="`Настройка прав ${userInEdit?.telegram_username || 'Unknown'}`">
-      <div v-for="userRight in Object.keys(userInEdit?.rights || {})" :key="userRight" class="flex items-center gap-2">
+    <Dialog
+      v-model:visible="rightsModalVisible"
+      modal
+      :header="`Настройка прав ${userInEdit?.telegram_username || 'Unknown'}`"
+    >
+      <div
+        v-for="userRight in Object.keys(userInEdit?.rights || {})"
+        :key="userRight"
+        class="flex items-center gap-2"
+      >
         <Checkbox v-model="checkedRights" :inputId="userRight" :value="userRight" />
         <label :for="userRight">{{ userPermissionsLocale[userRight] || 'Unknown' }}</label>
       </div>
@@ -52,10 +70,16 @@
         <Button @click="saveRightsModal">Сохранить</Button>
       </div>
     </Dialog>
-    <Dialog v-model:visible="settingsModalVisible" modal
-      :header="`Настройки пользователя ${userInEdit?.telegram_username || 'Unknown'}`">
-      <div v-for="userSetting in Object.keys(userInEdit?.settings || {})" :key="userSetting"
-        class="flex items-center gap-2">
+    <Dialog
+      v-model:visible="settingsModalVisible"
+      modal
+      :header="`Настройки пользователя ${userInEdit?.telegram_username || 'Unknown'}`"
+    >
+      <div
+        v-for="userSetting in Object.keys(userInEdit?.settings || {})"
+        :key="userSetting"
+        class="flex items-center gap-2"
+      >
         <Checkbox v-model="checkedSettings" :inputId="userSetting" :value="userSetting" />
         <label :for="userSetting">{{ userSettingsLocale[userSetting] || 'Unknown' }}</label>
       </div>
@@ -63,8 +87,12 @@
         <Button @click="saveSettingsModal">Сохранить</Button>
       </div>
     </Dialog>
-    <Dialog v-model:visible="balanceModalVisible" modal class="big-dialog"
-      :header="`Транзакции пользователя ${userInEdit?.telegram_username || 'Unknown'}`">
+    <Dialog
+      v-model:visible="balanceModalVisible"
+      modal
+      class="big-dialog"
+      :header="`Транзакции пользователя ${userInEdit?.telegram_username || 'Unknown'}`"
+    >
       <div class="flex">
         <div class="flex flex-col min-w-48 min-h-72">
           <span>Баланс: {{ userInEdit?.balance }}</span>
@@ -72,12 +100,20 @@
           <div class="flex flex-col gap-2">
             <span>Create new transaction</span>
             <IftaLabel>
-              <Select v-model="choosedTransactionType" :options="allTransactionTypes" optionLabel="label"
-                labelId="transaction-type-select" class="w-full"></Select>
+              <Select
+                v-model="chosenTransactionType"
+                :options="allTransactionTypes"
+                optionLabel="label"
+                labelId="transaction-type-select"
+                class="w-full"
+              ></Select>
               <label for="transaction-type-select">Type</label>
             </IftaLabel>
             <IftaLabel>
-              <InputNumber v-model="choosedTransactionAmount" inputId="transaction-amount-input"></InputNumber>
+              <InputNumber
+                v-model="chosenTransactionAmount"
+                inputId="transaction-amount-input"
+              ></InputNumber>
               <label for="transaction-amount-input">Amount</label>
             </IftaLabel>
             <Button @click="onAddNewTransaction">Add</Button>
@@ -85,9 +121,16 @@
         </div>
         <Divider layout="vertical" />
         <div class="min-w-96 min-h-72">
-          <DataTable :value="transactionsList" :lazy="true" :paginator="true" :rows="maxTransactionRows"
-            @page="onPageChangeTransactions" :totalRecords="totalTransactions" :loading="isLoadingTransactions"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink">
+          <DataTable
+            :value="transactionsList"
+            :lazy="true"
+            :paginator="true"
+            :rows="maxTransactionRows"
+            @page="onPageChangeTransactions"
+            :totalRecords="totalTransactions"
+            :loading="isLoadingTransactions"
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+          >
             <Column field="transaction_type" header="Type">
               <template #loading>
                 <Skeleton width="2rem" height="1rem" />
@@ -120,17 +163,20 @@
 </template>
 
 <script setup lang="ts">
-
 // #region Imports
 
-import { Icon } from '@iconify/vue'
+import { Icon } from '@iconify/vue';
 import type { Tariff } from '@/api/tariff/schema';
 import { tariffAll } from '@/api/tariff/service';
-import { UserPatchRqSchema, type User, type UserRights, type UserSettings } from '@/api/user/schema';
+import {
+  UserPatchRqSchema,
+  type User,
+  type UserRights,
+  type UserSettings,
+} from '@/api/user/schema';
 import { userGet, userGetById, userPatch } from '@/api/user/service';
 import useErrorToast from '@/composables/useErrorToast';
 import userPermissionsLocale from '@/utils/locale/userPermissionsLocale';
-import { isAxiosError } from 'axios';
 import type { DataTableCellEditCompleteEvent, DataTablePageEvent } from 'primevue/datatable';
 import { onMounted, ref, shallowRef } from 'vue';
 import userSettingsLocale from '@/utils/locale/userSettingsLocale';
@@ -154,9 +200,13 @@ const users = ref<User[]>([]);
 const userInEdit = ref<User | null>(null);
 
 const updateUserInEdit = async () => {
-  if (!userInEdit.value) return;
+  const user = await errorToast.safeExecute(async () => {
+    if (!userInEdit.value) return null;
 
-  await userGetById({ user_id: userInEdit.value.id }).then((user) => {
+    return await userGetById({ user_id: userInEdit.value.id });
+  });
+
+  if (user) {
     const index = users.value.indexOf(userInEdit.value!);
 
     if (index === -1) {
@@ -166,15 +216,8 @@ const updateUserInEdit = async () => {
 
     users.value[index] = user;
     userInEdit.value = user;
-  }).catch((error) => {
-    if (isAxiosError(error)) {
-      errorToast.error(error);
-    }
-    else {
-      throw error;
-    }
-  });
-}
+  }
+};
 
 // #endregion
 
@@ -194,21 +237,16 @@ const openRightsModal = (user: User) => {
   rightsModalVisible.value = true;
 };
 
-const saveRightsModal = () => {
-  try {
-    const rights = { ...userInEdit.value!.rights } as UserRights;
-    Object.keys(rights).forEach((right) => {
-      rights[right as keyof UserRights] = checkedRights.value.includes(right);
-    });
-    userPatch(userInEdit.value!.id, UserPatchRqSchema.parse({ rights }));
-    userInEdit.value!.rights = rights;
-  } catch (error) {
-    if (isAxiosError(error)) {
-      errorToast.error(error);
-    } else {
-      throw error;
-    }
-  }
+const saveRightsModal = async () => {
+  const rights = { ...userInEdit.value!.rights } as UserRights;
+  Object.keys(rights).forEach((right) => {
+    rights[right as keyof UserRights] = checkedRights.value.includes(right);
+  });
+
+  await errorToast.safeExecute(async () => {
+    await userPatch(userInEdit.value!.id, { rights });
+  });
+  userInEdit.value!.rights = rights;
 
   rightsModalVisible.value = false;
 };
@@ -231,21 +269,17 @@ const openSettingsModal = (user: User) => {
   settingsModalVisible.value = true;
 };
 
-const saveSettingsModal = () => {
-  try {
-    const settings = { ...userInEdit.value!.settings } as UserSettings;
-    Object.keys(settings).forEach((setting) => {
-      settings[setting as keyof UserSettings] = checkedSettings.value.includes(setting);
-    });
-    userPatch(userInEdit.value!.id, { settings });
-    userInEdit.value!.settings = settings;
-  } catch (error) {
-    if (isAxiosError(error)) {
-      errorToast.error(error);
-    } else {
-      throw error;
-    }
-  }
+const saveSettingsModal = async () => {
+  const settings = { ...userInEdit.value!.settings } as UserSettings;
+  Object.keys(settings).forEach((setting) => {
+    settings[setting as keyof UserSettings] = checkedSettings.value.includes(setting);
+  });
+
+  await errorToast.safeExecute(async () => {
+    await userPatch(userInEdit.value!.id, { settings });
+  });
+
+  userInEdit.value!.settings = settings;
 
   settingsModalVisible.value = false;
 };
@@ -260,18 +294,18 @@ const transactionsList = ref<TransactionAllGetRs>([]);
 const totalTransactions = ref(0);
 const isLoadingTransactions = ref(false);
 const currentPageTransactions = ref(0);
-const allTransactionTypes = ref<{ label: string, value: string }[]>([]);
-const choosedTransactionType = ref<{ label: string, value: string }>();
-const choosedTransactionAmount = ref<number>(0);
+const allTransactionTypes = ref<{ label: string; value: string }[]>([]);
+const chosenTransactionType = ref<{ label: string; value: string }>();
+const chosenTransactionAmount = ref<number>(0);
 
 const openBalanceModal = async (user: User) => {
   userInEdit.value = user;
 
   totalTransactions.value = await transactionCount({
-    user_id: user.id
+    user_id: user.id,
   });
 
-  loadTransactions();
+  await loadTransactions();
   balanceModalVisible.value = true;
 };
 
@@ -280,67 +314,62 @@ const loadTransactions = async () => {
 
   transactionsList.value = await transactionGet({
     user_id: userInEdit.value!.id,
-    offset: currentPageTransactions.value * maxTransactionRows, limit: maxTransactionRows
+    offset: currentPageTransactions.value * maxTransactionRows,
+    limit: maxTransactionRows,
   });
 
-  isLoadingTransactions.value = false
-}
+  isLoadingTransactions.value = false;
+};
 
-const onPageChangeTransactions = (event: DataTablePageEvent) => {
+const onPageChangeTransactions = async (event: DataTablePageEvent) => {
   currentPageTransactions.value = event.page;
 
-  loadTransactions();
-}
+  await loadTransactions();
+};
 
 const onAddNewTransaction = async () => {
-  try {
+  await errorToast.safeExecute(async () => {
     await transactionPost({
       user_id: userInEdit.value!.id,
-      amount: choosedTransactionAmount.value,
-      transaction_type: choosedTransactionType.value?.value as TransactionType || 'refund',
+      amount: chosenTransactionAmount.value,
+      transaction_type: (chosenTransactionType.value?.value as TransactionType) || 'refund',
       date: new Date(),
-      description: ''
+      description: '',
     });
 
-    choosedTransactionAmount.value = 0;
+    chosenTransactionAmount.value = 0;
 
     totalTransactions.value = await transactionCount({
-      user_id: userInEdit.value!.id
+      user_id: userInEdit.value!.id,
     });
     await loadTransactions();
 
     await updateUserInEdit();
-  } catch (error) {
-    if (isAxiosError(error)) {
-      errorToast.error(error);
-    } else {
-      throw error;
-    }
-  }
-}
+  });
+};
 
 // #endregion
 
 // #region User Transactions
 
 const tariffs = ref<Tariff[]>([]);
-const choosenTariff = ref<Record<string, Tariff>>({});
+const chosenTariff = ref<Record<string, Tariff>>({});
 
 // #endregion
 
-const updateDataTable = (event: DataTableCellEditCompleteEvent<User>) => {
-  try {
-    if (event.data.telegram_id === event.newData.telegram_id) return;
-    userPatch(event.data.id, UserPatchRqSchema.parse({ telegram_id: event.newData.telegram_id }));
+const updateDataTable = async (event: DataTableCellEditCompleteEvent<User>) => {
+  if (event.data.telegram_id === event.newData.telegram_id) return;
+
+  const result = await errorToast.safeExecute(async () => {
+    await userPatch(
+      event.data.id,
+      UserPatchRqSchema.parse({ telegram_id: event.newData.telegram_id }),
+    );
+    return true;
+  });
+
+  if (result)
     users.value.find((user) => user.id === event.data.id)!.telegram_id = event.newData.telegram_id;
-  } catch (error) {
-    event.originalEvent.preventDefault();
-    if (isAxiosError(error)) {
-      errorToast.error(error);
-    } else {
-      throw error;
-    }
-  }
 };
 
 onMounted(async () => {
@@ -353,11 +382,14 @@ onMounted(async () => {
   });
 
   users.value.forEach((user) => {
-    choosenTariff.value[user.id] = tariffs.value.find((tariff) => tariff.id === user.tariff.id)!;
+    chosenTariff.value[user.id] = tariffs.value.find((tariff) => tariff.id === user.tariff.id)!;
   });
 
   Object.keys(transactionsLocale).forEach((transactionType) => {
-    allTransactionTypes.value.push({ label: transactionsLocale[transactionType as keyof typeof transactionsLocale]!, value: transactionType });
+    allTransactionTypes.value.push({
+      label: transactionsLocale[transactionType as keyof typeof transactionsLocale]!,
+      value: transactionType,
+    });
   });
 });
 </script>
