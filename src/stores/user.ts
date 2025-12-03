@@ -16,12 +16,12 @@ export const useUserStore = defineStore('user', () => {
         user.value = response;
         return true;
       })
-      .catch((e) => {
+      .catch(() => {
         if (user.value) {
           user.value = null;
           console.warn('User was logged out');
         }
-        console.error('Error occurred while trying to get user data', e);
+        console.log('User not logged in');
         return false;
       });
   };
