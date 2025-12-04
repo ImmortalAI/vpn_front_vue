@@ -3,15 +3,27 @@
     <Card>
       <template #title>Пользователи</template>
       <template #content>
-        <DataTable editMode="cell" :value="users" dataKey="id" @cellEditComplete="updateDataTable">
+        <DataTable
+          editMode="cell"
+          :value="users"
+          dataKey="id"
+          @cellEditComplete="updateDataTable"
+          :loading="loadingTable"
+        >
+          <template #loading>
+            <div class="flex gap-2">
+              <Icon width="2rem" icon="line-md:loading-loop"></Icon>
+              <span class="text-2xl">Loading users...</span>
+            </div>
+          </template>
           <!-- <Column expander style="width: 5rem" /> -->
-          <Column field="id" header="Id"></Column>
+          <Column field="id" header="Id"> </Column>
           <Column field="telegram_id" header="Telegram ID">
             <template #editor="{ data, field }">
               <InputNumber :useGrouping="false" v-model="data[field]" :min="0"></InputNumber>
             </template>
           </Column>
-          <Column field="telegram_username" header="TG Username"></Column>
+          <Column field="telegram_username" header="TG Username"> </Column>
           <Column field="balance" header="Balance">
             <template #body="slotProps">
               <Button
@@ -131,23 +143,16 @@
             :loading="isLoadingTransactions"
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
           >
+            <template #loading>
+              <Skeleton width="100%" height="400px" />
+            </template>
             <Column field="transaction_type" header="Type">
-              <template #loading>
-                <Skeleton width="2rem" height="1rem" />
-              </template>
               <template #body="slotProps">
                 {{ transactionsLocale[slotProps.data.transaction_type] || 'Unknown' }}
               </template>
             </Column>
-            <Column field="amount" header="Amount">
-              <template #loading>
-                <Skeleton width="2rem" height="1rem" />
-              </template>
-            </Column>
+            <Column field="amount" header="Amount"> </Column>
             <Column field="date" header="Date" sortable>
-              <template #loading>
-                <Skeleton width="2rem" height="1rem" />
-              </template>
               <template #body="slotProps">
                 {{ formatRuDateTime(slotProps.data.date) }}
               </template>
@@ -178,7 +183,7 @@ import { userGet, userGetById, userPatch } from '@/api/user/service';
 import useErrorToast from '@/composables/useErrorToast';
 import userPermissionsLocale from '@/utils/locale/userPermissionsLocale';
 import type { DataTableCellEditCompleteEvent, DataTablePageEvent } from 'primevue/datatable';
-import { onMounted, ref, shallowRef } from 'vue';
+import { onMounted, ref } from 'vue';
 import userSettingsLocale from '@/utils/locale/userSettingsLocale';
 import type { TransactionAllGetRs } from '@/api/transaction/schema';
 import { transactionCount, transactionGet, transactionPost } from '@/api/transaction/service';
@@ -196,58 +201,86 @@ const errorToast = useErrorToast();
 
 // #region Globals
 
+// Array of all users
 const users = ref<User[]>([]);
+// Currently edited user (for modals)
 const userInEdit = ref<User | null>(null);
 
-const updateUserInEdit = async () => {
+/**
+ * Updates the user in edit in the list of users.
+ *
+ * If the user in edit is not found in the list, an error is logged.
+ */
+const updateUserInEdit = async (): Promise<void> => {
   const user = await errorToast.safeExecute(async () => {
     if (!userInEdit.value) return null;
 
     return await userGetById({ user_id: userInEdit.value.id });
   });
 
-  if (user) {
-    const index = users.value.indexOf(userInEdit.value!);
+  if (!user) return;
+  const index = users.value.indexOf(userInEdit.value!);
 
-    if (index === -1) {
-      console.error('User in edit not found in the list');
-      return;
-    }
-
-    users.value[index] = user;
-    userInEdit.value = user;
+  if (index === -1) {
+    console.error('User in edit not found in the list');
+    return;
   }
+
+  users.value[index] = user;
+  userInEdit.value = user;
 };
 
 // #endregion
 
 // #region User Rights Modal
 
-const rightsModalVisible = shallowRef(false);
+const rightsModalVisible = ref(false);
 const checkedRights = ref<string[]>([]);
 
+/**
+ * Opens the user rights modal for the given user.
+ * Resets the checked rights and sets the user in edit.
+ * @param {User} user - The user to open the modal for.
+ */
 const openRightsModal = (user: User) => {
+  // Set the user in edit and reset checked rights
   userInEdit.value = user;
   checkedRights.value = [];
+  // Populate checked rights based on the user's current rights
   Object.keys(user.rights).forEach((right) => {
     if (user.rights[right as keyof UserRights]) {
       checkedRights.value.push(right);
     }
   });
+  // Show the rights modal
   rightsModalVisible.value = true;
 };
 
+/**
+ * Saves the changes made to the user's rights in the user rights modal.
+ * Closes the user rights modal.
+ */
 const saveRightsModal = async () => {
+  // Create a copy of the user's rights (not modified directly)
   const rights = { ...userInEdit.value!.rights } as UserRights;
+  // Update rights based on checked rights
   Object.keys(rights).forEach((right) => {
     rights[right as keyof UserRights] = checkedRights.value.includes(right);
   });
 
-  await errorToast.safeExecute(async () => {
+  // Send the updated rights to the server
+  const result = await errorToast.safeExecute(async () => {
     await userPatch(userInEdit.value!.id, { rights });
-  });
-  userInEdit.value!.rights = rights;
 
+    return true;
+  });
+
+  // Update the user in edit if the request was successful
+  if (result) {
+    await updateUserInEdit();
+  }
+
+  // Close the rights modal
   rightsModalVisible.value = false;
 };
 
@@ -255,10 +288,17 @@ const saveRightsModal = async () => {
 
 // #region User Settings Modal
 
-const settingsModalVisible = shallowRef(false);
+const settingsModalVisible = ref(false);
 const checkedSettings = ref<string[]>([]);
 
+/**
+ * Opens the user settings modal for the given user.
+ * Fills the checked settings with the user's current settings.
+ * @param {User} user - The user to open the modal for.
+ */
 const openSettingsModal = (user: User) => {
+  // Like in the rights modal, set the user in edit and reset checked settings
+  // then populate checked settings based on the user's current settings
   userInEdit.value = user;
   checkedSettings.value = [];
   Object.keys(user.settings).forEach((setting) => {
@@ -266,21 +306,36 @@ const openSettingsModal = (user: User) => {
       checkedSettings.value.push(setting);
     }
   });
+
+  // Show the settings modal
   settingsModalVisible.value = true;
 };
 
+/**
+ * Saves the user settings in the settings modal.
+ * Patches the user settings in the API and updates the user in edit's settings.
+ * Closes the settings modal after saving.
+ */
 const saveSettingsModal = async () => {
+  // Similar to the rights modal, create a copy of the user's settings
+  // and update it based on the checked settings
   const settings = { ...userInEdit.value!.settings } as UserSettings;
   Object.keys(settings).forEach((setting) => {
     settings[setting as keyof UserSettings] = checkedSettings.value.includes(setting);
   });
 
-  await errorToast.safeExecute(async () => {
+  const result = await errorToast.safeExecute(async () => {
     await userPatch(userInEdit.value!.id, { settings });
+
+    return true;
   });
 
-  userInEdit.value!.settings = settings;
+  // Update the user in edit if the request was successful
+  if (result) {
+    await updateUserInEdit();
+  }
 
+  // Close the settings modal
   settingsModalVisible.value = false;
 };
 
@@ -288,47 +343,79 @@ const saveSettingsModal = async () => {
 
 // #region User Transactions Modal
 
-const maxTransactionRows = 5;
-const balanceModalVisible = shallowRef(false);
+const balanceModalVisible = ref(false);
+
+// Paramenters that control the transactions list
 const transactionsList = ref<TransactionAllGetRs>([]);
+// FIXME: Better to make this limit dynamic based on screen size...
+const maxTransactionRows = 5;
 const totalTransactions = ref(0);
 const isLoadingTransactions = ref(false);
 const currentPageTransactions = ref(0);
+
+// Parameters for creating a new transaction
 const allTransactionTypes = ref<{ label: string; value: string }[]>([]);
 const chosenTransactionType = ref<{ label: string; value: string }>();
 const chosenTransactionAmount = ref<number>(0);
 
+/**
+ * Loads the user's transactions based on the current page and limit.
+ * Sets isLoadingTransactions to true while loading and false when done.
+ */
+const loadTransactions = async () => {
+  isLoadingTransactions.value = true;
+
+  const result = await errorToast.safeExecute(async () => {
+    return await transactionGet({
+      user_id: userInEdit.value!.id,
+      offset: currentPageTransactions.value * maxTransactionRows,
+      limit: maxTransactionRows,
+    });
+  });
+
+  if (result) transactionsList.value = result;
+
+  isLoadingTransactions.value = false;
+};
+
+/**
+ * Opens the balance modal for the given user.
+ * Loads the user's transactions and sets the total transactions count.
+ * @param {User} user - The user to open the modal for.
+ */
 const openBalanceModal = async (user: User) => {
   userInEdit.value = user;
 
-  totalTransactions.value = await transactionCount({
-    user_id: user.id,
+  const result = await errorToast.safeExecute(async () => {
+    return await transactionCount({
+      user_id: user.id,
+    });
   });
+
+  if (result) totalTransactions.value = result;
 
   await loadTransactions();
   balanceModalVisible.value = true;
 };
 
-const loadTransactions = async () => {
-  isLoadingTransactions.value = true;
-
-  transactionsList.value = await transactionGet({
-    user_id: userInEdit.value!.id,
-    offset: currentPageTransactions.value * maxTransactionRows,
-    limit: maxTransactionRows,
-  });
-
-  isLoadingTransactions.value = false;
-};
-
+/**
+ * Called when the user changes the page in the transactions data table.
+ * Updates the current page and loads the transactions for the new page.
+ * @param {DataTablePageEvent} event - The event that triggered the page change.
+ */
 const onPageChangeTransactions = async (event: DataTablePageEvent) => {
   currentPageTransactions.value = event.page;
 
   await loadTransactions();
 };
 
+/**
+ * Adds a new transaction for the user currently in edit.
+ * Updates the user's total transactions count and loads the new transactions list.
+ * Resets the chosen transaction amount to 0.
+ */
 const onAddNewTransaction = async () => {
-  await errorToast.safeExecute(async () => {
+  const result = await errorToast.safeExecute(async () => {
     await transactionPost({
       user_id: userInEdit.value!.id,
       amount: chosenTransactionAmount.value,
@@ -337,15 +424,20 @@ const onAddNewTransaction = async () => {
       description: '',
     });
 
-    chosenTransactionAmount.value = 0;
-
-    totalTransactions.value = await transactionCount({
-      user_id: userInEdit.value!.id,
-    });
-    await loadTransactions();
-
-    await updateUserInEdit();
+    return true;
   });
+
+  if (!result) return;
+
+  chosenTransactionAmount.value = 0;
+
+  totalTransactions.value = await transactionCount({
+    user_id: userInEdit.value!.id,
+  });
+  await loadTransactions();
+
+  // Update the user in edit to reflect the new balance
+  await updateUserInEdit();
 };
 
 // #endregion
@@ -365,20 +457,32 @@ const updateDataTable = async (event: DataTableCellEditCompleteEvent<User>) => {
       event.data.id,
       UserPatchRqSchema.parse({ telegram_id: event.newData.telegram_id }),
     );
+
     return true;
   });
 
-  if (result)
-    users.value.find((user) => user.id === event.data.id)!.telegram_id = event.newData.telegram_id;
-};
+  if (!result) return;
 
-onMounted(async () => {
-  await userGet().then((response) => {
-    users.value = response;
+  const userAfterUpdate = await errorToast.safeExecute(async () => {
+    return await userGetById({ user_id: event.data.id });
   });
 
-  await tariffAll().then((response) => {
-    tariffs.value = response;
+  if (!userAfterUpdate) return;
+
+  users.value[event.index] = userAfterUpdate;
+};
+
+const loadingTable = ref(true);
+
+onMounted(async () => {
+  await errorToast.safeExecute(async () => {
+    await userGet().then((response) => {
+      users.value = response;
+    });
+
+    await tariffAll().then((response) => {
+      tariffs.value = response;
+    });
   });
 
   users.value.forEach((user) => {
@@ -391,5 +495,9 @@ onMounted(async () => {
       value: transactionType,
     });
   });
+
+  await new Promise((resolve) => setTimeout(resolve, 500)); // Artificial delay for better UX
+
+  loadingTable.value = false;
 });
 </script>
