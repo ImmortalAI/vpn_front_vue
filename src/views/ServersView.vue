@@ -56,49 +56,58 @@
         <template #expansion="slotProps">
           <div class="flex">
             <div class="flex flex-col">
-              <FloatLabel>
+              <FloatLabel class="float-label-spacer">
                 <InputNumber :inputId="'port-gen-input-' + slotProps.index"
                   v-model="(slotProps.data as Server).port_generator_port" :useGrouping="false" :min="0" :max="65535" />
                 <label :for="'port-gen-input-' + slotProps.index">Port generator</label>
               </FloatLabel>
-              <FloatLabel>
+              <FloatLabel class="float-label-spacer">
                 <InputText :inputId="'web-path-input-' + slotProps.index"
                   v-model="(slotProps.data as Server).web_path" />
                 <label :for="'web-path-input-' + slotProps.index">Web path</label>
               </FloatLabel>
-              <FloatLabel>
+
+            </div>
+            <div class="flex flex-col">
+              <FloatLabel class="float-label-spacer">
                 <InputText :inputId="'panel-login-input-' + slotProps.index"
                   v-model="(slotProps.data as Server).login" />
                 <label :for="'panel-login-input-' + slotProps.index">Panel login</label>
               </FloatLabel>
-              <FloatLabel>
+              <FloatLabel class="float-label-spacer">
                 <InputText :inputId="'panel-password-input-' + slotProps.index"
                   v-model="(slotProps.data as Server).password" />
                 <label :for="'panel-password-input-' + slotProps.index">Panel password</label>
               </FloatLabel>
             </div>
             <div class="flex flex-col">
-              <FloatLabel>
+              <FloatLabel class="float-label-spacer">
                 <InputNumber :inputId="'vless-id-input-' + slotProps.index" :useGrouping="false"
                   v-model="(slotProps.data as Server).vless_reality_id" />
                 <label :for="'vless-id-input-' + slotProps.index">Vless ID</label>
               </FloatLabel>
-              <FloatLabel>
+              <FloatLabel class="float-label-spacer">
                 <InputNumber :inputId="'vless-port-input-' + slotProps.index" :useGrouping="false"
                   v-model="(slotProps.data as Server).vless_reality_id" :min="0" :max="65535" />
                 <label :for="'vless-port-input-' + slotProps.index">Vless port</label>
               </FloatLabel>
-              <FloatLabel>
+
+
+            </div>
+            <div class="flex flex-col">
+              <FloatLabel class="float-label-spacer">
                 <InputText :inputId="'vless-domain-input-' + slotProps.index"
                   v-model="(slotProps.data as Server).vless_reality_domain_short_id" />
                 <label :for="'vless-domain-input-' + slotProps.index">Vless domain ID</label>
               </FloatLabel>
-              <FloatLabel>
+              <FloatLabel class="float-label-spacer">
                 <InputText :inputId="'vless-pubkey-input-' + slotProps.index"
                   v-model="(slotProps.data as Server).vless_reality_public_key" />
                 <label :for="'vless-pubkey-input-' + slotProps.index">Vless reality public key</label>
               </FloatLabel>
-              <FloatLabel>
+            </div>
+            <div class="flex flex-col">
+              <FloatLabel class="float-label-spacer">
                 <InputText :inputId="'vless-key-input-' + slotProps.index"
                   v-model="(slotProps.data as Server).vless_reality_private_key" />
                 <label :for="'vless-key-input-' + slotProps.index">Vless reality private key</label>
@@ -145,7 +154,7 @@ const createServer = async () => {
     return await serverPost({
       ip: '1.1.1.1',
       description: '',
-      country_code: 'FI',
+      country_code: 'AA',
       is_available: true,
       display_name: '',
       starting_date: new Date(),
@@ -186,3 +195,11 @@ onMounted(async () => {
   loadingTable.value = false;
 });
 </script>
+
+<style lang="css" scoped>
+@reference '@/assets/styles.css';
+
+.float-label-spacer {
+  @apply mt-8 w-64;
+}
+</style>
