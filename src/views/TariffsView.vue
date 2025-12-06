@@ -10,7 +10,7 @@
           <template #loading>
             <div class="flex gap-2">
               <Icon width="2rem" icon="line-md:loading-loop"></Icon>
-              <span class="text-2xl">Loading users...</span>
+              <span class="text-2xl">Loading tariff list...</span>
             </div>
           </template>
           <template #header>
@@ -76,45 +76,27 @@ import { tariffAll, tariffDelete, tariffGet, tariffPatch, tariffPost } from '@/a
 import useErrorToast from '@/composables/useErrorToast';
 import type { DataTableCellEditCompleteEvent } from 'primevue/datatable';
 import { onMounted, ref } from 'vue';
+import { Icon } from '@iconify/vue';
 // #endregion
 
 const errorToast = useErrorToast();
 
-const tariffs = ref<Tariff[]>([]);
-const dataTableLoading = ref(true);
 
-onMounted(async () => {
-  await errorToast
-    .safeExecute(async () => {
-      await tariffAll()
-        .then((response) => {
-          tariffs.value = response;
-        });
-    });
-
-  await new Promise((resolve) => setTimeout(resolve, 500)); // Artificial delay for better UX
-
-  dataTableLoading.value = false;
-});
 
 const onUpdateTariff = async (event: DataTableCellEditCompleteEvent<Tariff>) => {
-  dataTableLoading.value = true;
-  await errorToast.safeExecute(async () => {
-    await tariffPatch(event.data.id, {
+  const result = await errorToast.safeExecute(async () => {
+    return await tariffPatch(event.data.id, {
       [event.field as keyof TariffPatchRq]: event.newValue,
     });
   });
 
-  await refreshTariff(event.data.id, event.index);
-  dataTableLoading.value = false;
+  if (result) await refreshTariff(event.data.id, event.index);
 };
 
 const newTariffName = ref('');
 const apiCreateTariff = async () => {
-  dataTableLoading.value = true;
-
-  await errorToast.safeExecute(async () => {
-    await tariffPost({
+  const result = await errorToast.safeExecute(async () => {
+    return await tariffPost({
       name: newTariffName.value || 'New Tariff',
       description: '',
       duration: 1,
@@ -125,19 +107,17 @@ const apiCreateTariff = async () => {
     });
   });
 
-  await refreshAllTariffs();
-  dataTableLoading.value = false;
+  if (result) {
+    tariffs.value.push(result);
+  }
 };
 
 const apiDeleteTariff = async (tariffId: string) => {
-  dataTableLoading.value = true;
-
-  await errorToast.safeExecute(async () => {
-    await tariffDelete(tariffId);
+  const result = await errorToast.safeExecute(async () => {
+    return await tariffDelete(tariffId);
   });
 
-  await refreshAllTariffs();
-  dataTableLoading.value = false;
+  if (result) await refreshAllTariffs();
 };
 
 const refreshTariff = async (tariffId: string, replaceTariffIdx: number) => {
@@ -157,4 +137,21 @@ const refreshAllTariffs = async () => {
     tariffs.value = newTariffs;
   }
 };
+
+const tariffs = ref<Tariff[]>([]);
+const dataTableLoading = ref(true);
+
+onMounted(async () => {
+  await errorToast
+    .safeExecute(async () => {
+      await tariffAll()
+        .then((response) => {
+          tariffs.value = response;
+        });
+    });
+
+  await new Promise((resolve) => setTimeout(resolve, 500)); // Artificial delay for better UX
+
+  dataTableLoading.value = false;
+});
 </script>

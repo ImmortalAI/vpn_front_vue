@@ -38,6 +38,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/servers',
+      name: 'servers',
+      component: () => import('@/views/ServersView.vue'),
+      meta: {
+        canRedirectHome: true,
+      },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue'),

@@ -1,9 +1,18 @@
 <template>
-  <div>
-    <h1>Дашборд</h1>
-    <RouterLink to="/users">Пользователи</RouterLink>
-    <RouterLink to="/tariffs">Тарифы</RouterLink>
+  <div class="flex flex-col gap-4 w-screen h-[70vh] justify-center items-center">
+    <h1 class="text-4xl font-bold">Dashboard</h1>
+    <RouterLink to="/users" class="router-link-btn">Users</RouterLink>
+    <RouterLink to="/tariffs" class="router-link-btn">Tariffs</RouterLink>
+    <RouterLink to="/servers" class="router-link-btn">Servers</RouterLink>
   </div>
 </template>
 
 <script setup lang="ts"></script>
+
+<style lang="css" scoped>
+@reference '@/assets/styles.css';
+
+.router-link-btn {
+  @apply border-2 border-surface-500 rounded-2xl p-2 w-48 text-center;
+}
+</style>

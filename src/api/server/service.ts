@@ -30,7 +30,7 @@ import { UuidSchema } from '@/api/base/schema';
  * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
  */
 export async function serverGet(data?: ServerGetRq): Promise<ServerGetRs> {
-  ServerGetRqSchema.parse(data);
+  ServerGetRqSchema.parse(data ?? {});
   const response = await apiClient.get('/servers', {
     params: data,
   });
