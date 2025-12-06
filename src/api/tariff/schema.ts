@@ -30,7 +30,7 @@ export const TariffPostRqSchema = TariffSchema.omit({ id: true });
 export type TariffPostRq = z.infer<typeof TariffPostRqSchema>;
 
 // response post /tariffs
-export { MessageRsSchema as TariffPostRsSchema, type MessageRs as TariffPostRs };
+export { TariffSchema as TariffPostRsSchema, type Tariff as TariffPostRs };
 
 // request patch /tariffs/{tariff_id}
 export const TariffPatchRqSchema = TariffSchema.omit({ id: true }).partial();

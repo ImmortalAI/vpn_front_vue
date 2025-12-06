@@ -1,6 +1,5 @@
 // #region imports
 import * as z from 'zod';
-import { MessageRsSchema, type MessageRs } from '@/api/base/schema';
 // #endregion
 
 export const TransactionTypeSchema = z.enum(['refund', 'replenishment', 'withdrawal']);
@@ -21,7 +20,7 @@ export type Transaction = z.infer<typeof TransactionSchema>;
 export { TransactionSchema as TransactionPostRqSchema, type Transaction as TransactionPostRq };
 
 // response post /transactions
-export { MessageRsSchema as TransactionPostRsSchema, type MessageRs as TransactionPostRs };
+export { TransactionSchema as TransactionPostRsSchema, type Transaction as TransactionPostRs };
 
 // request get /transactions
 export const TransactionGetRqSchema = z.object({

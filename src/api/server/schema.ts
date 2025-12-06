@@ -47,7 +47,7 @@ export const ServerPostRqSchema = ServerSchema.omit({
 export type ServerPostRq = z.infer<typeof ServerPostRqSchema>;
 
 // response post /servers
-export { MessageRsSchema as ServerPostRsSchema, type MessageRs as ServerPostRs };
+export { ServerSchema as ServerPostRsSchema, type Server as ServerPostRs };
 
 // response get /servers/count
 export const ServerCountRsSchema = z.number().int().min(0);
