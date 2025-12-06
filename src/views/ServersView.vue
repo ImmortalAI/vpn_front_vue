@@ -2,8 +2,14 @@
   <Card>
     <template #title>Servers</template>
     <template #content>
-      <DataTable v-model:expandedRows="expandedRows" editMode="cell" :value="servers" dataKey="id"
-        @cellEditComplete="updateDataTable" :loading="loadingTable">
+      <DataTable
+        v-model:expandedRows="expandedRows"
+        editMode="cell"
+        :value="servers"
+        dataKey="id"
+        @cellEditComplete="updateDataTable"
+        :loading="loadingTable"
+      >
         <template #loading>
           <div class="flex gap-2">
             <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -57,59 +63,83 @@
           <div class="flex">
             <div class="flex flex-col">
               <FloatLabel class="float-label-spacer">
-                <InputNumber :inputId="'port-gen-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).port_generator_port" :useGrouping="false" :min="0" :max="65535" />
+                <InputNumber
+                  :inputId="'port-gen-input-' + slotProps.index"
+                  v-model="(slotProps.data as Server).port_generator_port"
+                  :useGrouping="false"
+                  :min="0"
+                  :max="65535"
+                />
                 <label :for="'port-gen-input-' + slotProps.index">Port generator</label>
               </FloatLabel>
               <FloatLabel class="float-label-spacer">
-                <InputText :inputId="'web-path-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).web_path" />
+                <InputText
+                  :inputId="'web-path-input-' + slotProps.index"
+                  v-model="(slotProps.data as Server).web_path"
+                />
                 <label :for="'web-path-input-' + slotProps.index">Web path</label>
               </FloatLabel>
-
             </div>
             <div class="flex flex-col">
               <FloatLabel class="float-label-spacer">
-                <InputText :inputId="'panel-login-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).login" />
+                <InputText
+                  :inputId="'panel-login-input-' + slotProps.index"
+                  v-model="(slotProps.data as Server).login"
+                />
                 <label :for="'panel-login-input-' + slotProps.index">Panel login</label>
               </FloatLabel>
               <FloatLabel class="float-label-spacer">
-                <InputText :inputId="'panel-password-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).password" />
+                <InputText
+                  :inputId="'panel-password-input-' + slotProps.index"
+                  v-model="(slotProps.data as Server).password"
+                />
                 <label :for="'panel-password-input-' + slotProps.index">Panel password</label>
               </FloatLabel>
             </div>
             <div class="flex flex-col">
               <FloatLabel class="float-label-spacer">
-                <InputNumber :inputId="'vless-id-input-' + slotProps.index" :useGrouping="false"
-                  v-model="(slotProps.data as Server).vless_reality_id" />
+                <InputNumber
+                  :inputId="'vless-id-input-' + slotProps.index"
+                  :useGrouping="false"
+                  v-model="(slotProps.data as Server).vless_reality_id"
+                />
                 <label :for="'vless-id-input-' + slotProps.index">Vless ID</label>
               </FloatLabel>
               <FloatLabel class="float-label-spacer">
-                <InputNumber :inputId="'vless-port-input-' + slotProps.index" :useGrouping="false"
-                  v-model="(slotProps.data as Server).vless_reality_id" :min="0" :max="65535" />
+                <InputNumber
+                  :inputId="'vless-port-input-' + slotProps.index"
+                  :useGrouping="false"
+                  v-model="(slotProps.data as Server).vless_reality_id"
+                  :min="0"
+                  :max="65535"
+                />
                 <label :for="'vless-port-input-' + slotProps.index">Vless port</label>
               </FloatLabel>
-
-
             </div>
             <div class="flex flex-col">
               <FloatLabel class="float-label-spacer">
-                <InputText :inputId="'vless-domain-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).vless_reality_domain_short_id" />
+                <InputText
+                  :inputId="'vless-domain-input-' + slotProps.index"
+                  v-model="(slotProps.data as Server).vless_reality_domain_short_id"
+                />
                 <label :for="'vless-domain-input-' + slotProps.index">Vless domain ID</label>
               </FloatLabel>
               <FloatLabel class="float-label-spacer">
-                <InputText :inputId="'vless-pubkey-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).vless_reality_public_key" />
-                <label :for="'vless-pubkey-input-' + slotProps.index">Vless reality public key</label>
+                <InputText
+                  :inputId="'vless-pubkey-input-' + slotProps.index"
+                  v-model="(slotProps.data as Server).vless_reality_public_key"
+                />
+                <label :for="'vless-pubkey-input-' + slotProps.index"
+                  >Vless reality public key</label
+                >
               </FloatLabel>
             </div>
             <div class="flex flex-col">
               <FloatLabel class="float-label-spacer">
-                <InputText :inputId="'vless-key-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).vless_reality_private_key" />
+                <InputText
+                  :inputId="'vless-key-input-' + slotProps.index"
+                  v-model="(slotProps.data as Server).vless_reality_private_key"
+                />
                 <label :for="'vless-key-input-' + slotProps.index">Vless reality private key</label>
               </FloatLabel>
             </div>
@@ -126,7 +156,10 @@
 import type { Server, ServerPatchRq } from '@/api/server/schema';
 import { serverGet, serverIdPatch, serverPost } from '@/api/server/service';
 import useErrorToast from '@/composables/useErrorToast';
-import { type DataTableCellEditCompleteEvent, type DataTableExpandedRows } from 'primevue/datatable';
+import {
+  type DataTableCellEditCompleteEvent,
+  type DataTableExpandedRows,
+} from 'primevue/datatable';
 import { onMounted, ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import formatRuDateTime from '@/utils/formatRuDateTime';
@@ -182,13 +215,11 @@ const expandedRows = ref<DataTableExpandedRows>({});
 const servers = ref<Server[]>([]);
 const loadingTable = ref<boolean>(true);
 onMounted(async () => {
-  await errorToast
-    .safeExecute(async () => {
-      await serverGet()
-        .then((response) => {
-          servers.value = response;
-        });
+  await errorToast.safeExecute(async () => {
+    await serverGet().then((response) => {
+      servers.value = response;
     });
+  });
 
   await new Promise((resolve) => setTimeout(resolve, 500)); // Artificial delay for better UX
 

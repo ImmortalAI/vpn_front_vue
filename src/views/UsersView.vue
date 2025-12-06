@@ -3,8 +3,13 @@
     <Card>
       <template #title>Users</template>
       <template #content>
-        <DataTable editMode="cell" :value="users" dataKey="id" @cellEditComplete="updateDataTable"
-          :loading="loadingTable">
+        <DataTable
+          editMode="cell"
+          :value="users"
+          dataKey="id"
+          @cellEditComplete="updateDataTable"
+          :loading="loadingTable"
+        >
           <template #loading>
             <div class="flex gap-2">
               <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -20,20 +25,31 @@
           <Column field="telegram_username" header="TG Username"> </Column>
           <Column field="balance" header="Balance">
             <template #body="slotProps">
-              <Button severity="secondary" rounded @click="openBalanceModal(slotProps.data as User)">
+              <Button
+                severity="secondary"
+                rounded
+                @click="openBalanceModal(slotProps.data as User)"
+              >
                 <Icon icon="line-md:clipboard-list"></Icon>
               </Button>
             </template>
           </Column>
           <Column field="tariff" header="Tariff">
             <template #body="slotProps">
-              <Select v-model="chosenTariff[(slotProps.data as User).id]" :options="tariffs"
-                optionLabel="name"></Select>
+              <Select
+                v-model="chosenTariff[(slotProps.data as User).id]"
+                :options="tariffs"
+                optionLabel="name"
+              ></Select>
             </template>
           </Column>
           <Column field="settings" header="Settings">
             <template #body="slotProps">
-              <Button severity="secondary" rounded @click="openSettingsModal(slotProps.data as User)">
+              <Button
+                severity="secondary"
+                rounded
+                @click="openSettingsModal(slotProps.data as User)"
+              >
                 <Icon icon="line-md:cog-loop"></Icon>
               </Button>
             </template>
@@ -48,9 +64,16 @@
         </DataTable>
       </template>
     </Card>
-    <Dialog v-model:visible="rightsModalVisible" modal
-      :header="`Permission settings for ${userInEdit?.telegram_username || 'Unknown'}`">
-      <div v-for="userRight in Object.keys(userInEdit?.rights || {})" :key="userRight" class="flex items-center gap-2">
+    <Dialog
+      v-model:visible="rightsModalVisible"
+      modal
+      :header="`Permission settings for ${userInEdit?.telegram_username || 'Unknown'}`"
+    >
+      <div
+        v-for="userRight in Object.keys(userInEdit?.rights || {})"
+        :key="userRight"
+        class="flex items-center gap-2"
+      >
         <Checkbox v-model="checkedRights" :inputId="userRight" :value="userRight" />
         <label :for="userRight">{{ userPermissionsLocale[userRight] || 'Unknown' }}</label>
       </div>
@@ -58,10 +81,16 @@
         <Button @click="saveRightsModal">Сохранить</Button>
       </div>
     </Dialog>
-    <Dialog v-model:visible="settingsModalVisible" modal
-      :header="`Account settings for ${userInEdit?.telegram_username || 'Unknown'}`">
-      <div v-for="userSetting in Object.keys(userInEdit?.settings || {})" :key="userSetting"
-        class="flex items-center gap-2">
+    <Dialog
+      v-model:visible="settingsModalVisible"
+      modal
+      :header="`Account settings for ${userInEdit?.telegram_username || 'Unknown'}`"
+    >
+      <div
+        v-for="userSetting in Object.keys(userInEdit?.settings || {})"
+        :key="userSetting"
+        class="flex items-center gap-2"
+      >
         <Checkbox v-model="checkedSettings" :inputId="userSetting" :value="userSetting" />
         <label :for="userSetting">{{ userSettingsLocale[userSetting] || 'Unknown' }}</label>
       </div>
@@ -69,8 +98,12 @@
         <Button @click="saveSettingsModal">Сохранить</Button>
       </div>
     </Dialog>
-    <Dialog v-model:visible="balanceModalVisible" modal class="big-dialog"
-      :header="`Transactions for ${userInEdit?.telegram_username || 'Unknown'}`">
+    <Dialog
+      v-model:visible="balanceModalVisible"
+      modal
+      class="big-dialog"
+      :header="`Transactions for ${userInEdit?.telegram_username || 'Unknown'}`"
+    >
       <div class="flex">
         <div class="flex flex-col min-w-48 min-h-72">
           <span>Баланс: {{ userInEdit?.balance }}</span>
@@ -78,12 +111,20 @@
           <div class="flex flex-col gap-2">
             <span>Create new transaction</span>
             <IftaLabel>
-              <Select v-model="chosenTransactionType" :options="allTransactionTypes" optionLabel="label"
-                labelId="transaction-type-select" class="w-full"></Select>
+              <Select
+                v-model="chosenTransactionType"
+                :options="allTransactionTypes"
+                optionLabel="label"
+                labelId="transaction-type-select"
+                class="w-full"
+              ></Select>
               <label for="transaction-type-select">Type</label>
             </IftaLabel>
             <IftaLabel>
-              <InputNumber v-model="chosenTransactionAmount" inputId="transaction-amount-input"></InputNumber>
+              <InputNumber
+                v-model="chosenTransactionAmount"
+                inputId="transaction-amount-input"
+              ></InputNumber>
               <label for="transaction-amount-input">Amount</label>
             </IftaLabel>
             <Button @click="onAddNewTransaction">Add</Button>
@@ -91,9 +132,16 @@
         </div>
         <Divider layout="vertical" />
         <div class="min-w-96 min-h-72">
-          <DataTable :value="transactionsList" :lazy="true" :paginator="true" :rows="maxTransactionRows"
-            @page="onPageChangeTransactions" :totalRecords="totalTransactions" :loading="isLoadingTransactions"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink">
+          <DataTable
+            :value="transactionsList"
+            :lazy="true"
+            :paginator="true"
+            :rows="maxTransactionRows"
+            @page="onPageChangeTransactions"
+            :totalRecords="totalTransactions"
+            :loading="isLoadingTransactions"
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+          >
             <template #loading>
               <Skeleton width="100%" height="400px" />
             </template>

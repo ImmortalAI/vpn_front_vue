@@ -5,8 +5,13 @@
         <h2>Tariffs</h2>
       </template>
       <template #content>
-        <DataTable editMode="cell" :value="tariffs" dataKey="id" @cellEditComplete="onUpdateTariff"
-          :loading="dataTableLoading">
+        <DataTable
+          editMode="cell"
+          :value="tariffs"
+          dataKey="id"
+          @cellEditComplete="onUpdateTariff"
+          :loading="dataTableLoading"
+        >
           <template #loading>
             <div class="flex gap-2">
               <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -37,30 +42,47 @@
           </Column>
           <Column field="traffic" header="Traffic (GiB)">
             <template #editor="{ data }">
-              <InputNumber v-model="(data as Tariff).traffic" :useGrouping="false" :min="0" suffix=" GiB" />
+              <InputNumber
+                v-model="(data as Tariff).traffic"
+                :useGrouping="false"
+                :min="0"
+                suffix=" GiB"
+              />
             </template>
           </Column>
           <Column field="price_of_traffic_reset" header="Price (Reset)">
             <template #editor="{ data }">
-              <InputNumber v-model="(data as Tariff).price_of_traffic_reset" mode="currency" currency="RUB" />
+              <InputNumber
+                v-model="(data as Tariff).price_of_traffic_reset"
+                mode="currency"
+                currency="RUB"
+              />
             </template>
           </Column>
           <Column field="is_special" header="Is Special">
             <template #body="slotProps">
-              <Checkbox v-model="(slotProps.data as Tariff).is_special" @change="
-                onUpdateTariff({
-                  data: slotProps.data as Tariff,
-                  field: 'is_special',
-                  index: slotProps.index,
-                  newValue: (slotProps.data as Tariff).is_special,
-                } as DataTableCellEditCompleteEvent<Tariff>)
-                " binary />
+              <Checkbox
+                v-model="(slotProps.data as Tariff).is_special"
+                @change="
+                  onUpdateTariff({
+                    data: slotProps.data as Tariff,
+                    field: 'is_special',
+                    index: slotProps.index,
+                    newValue: (slotProps.data as Tariff).is_special,
+                  } as DataTableCellEditCompleteEvent<Tariff>)
+                "
+                binary
+              />
             </template>
           </Column>
           <Column header="Manage">
             <template #body="slotProps">
-              <Button icon="pi pi-trash" class="p-button-danger" size="small"
-                @click="apiDeleteTariff((slotProps.data as Tariff).id)" />
+              <Button
+                icon="pi pi-trash"
+                class="p-button-danger"
+                size="small"
+                @click="apiDeleteTariff((slotProps.data as Tariff).id)"
+              />
             </template>
           </Column>
         </DataTable>
@@ -80,8 +102,6 @@ import { Icon } from '@iconify/vue';
 // #endregion
 
 const errorToast = useErrorToast();
-
-
 
 const onUpdateTariff = async (event: DataTableCellEditCompleteEvent<Tariff>) => {
   const result = await errorToast.safeExecute(async () => {
@@ -142,13 +162,11 @@ const tariffs = ref<Tariff[]>([]);
 const dataTableLoading = ref(true);
 
 onMounted(async () => {
-  await errorToast
-    .safeExecute(async () => {
-      await tariffAll()
-        .then((response) => {
-          tariffs.value = response;
-        });
+  await errorToast.safeExecute(async () => {
+    await tariffAll().then((response) => {
+      tariffs.value = response;
     });
+  });
 
   await new Promise((resolve) => setTimeout(resolve, 500)); // Artificial delay for better UX
 
