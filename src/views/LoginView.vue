@@ -1,12 +1,7 @@
 <template>
   <div class="flex flex-col items-center gap-8">
     <p class="text-4xl">Вход</p>
-    <Form
-      v-slot="$form"
-      :resolver
-      :validateOnBlur="true"
-      class="border-2 border-surface-500 p-8 rounded-2xl"
-    >
+    <Form v-slot="$form" :resolver :validateOnBlur="true" class="border-2 border-surface-500 p-8 rounded-2xl">
       <Fluid class="flex flex-col gap-4">
         <InputGroup class="mt-4">
           <FloatLabel>
@@ -14,36 +9,18 @@
             <label for="telegramIdInput">Telegram ID</label>
           </FloatLabel>
           <InputGroupAddon>
-            <Button
-              :icon="iconCodeSend"
-              :disabled="($form.telegramId?.invalid ?? false) || countdown.isActive.value"
-              @click="sendCodeClick"
-              :label="labelCodeSend"
-              :pt="{ label: { class: 'w-6' } }"
-            ></Button>
+            <Button :icon="iconCodeSend" :disabled="($form.telegramId?.invalid ?? false) || countdown.isActive.value"
+              @click="sendCodeClick" :label="labelCodeSend" :pt="{ label: { class: 'w-6' } }"></Button>
           </InputGroupAddon>
         </InputGroup>
-        <Message severity="error" v-if="$form.telegramId?.invalid ?? false"
-          >ID должен быть числом</Message
-        >
+        <Message severity="error" v-if="$form.telegramId?.invalid ?? false">ID должен быть числом</Message>
         <template v-if="codeSended">
           <FloatLabel class="mt-4">
-            <InputText
-              id="telegramCodeInput"
-              name="telegramCode"
-              v-model="telegramCode"
-            ></InputText>
+            <InputText id="telegramCodeInput" name="telegramCode" v-model="telegramCode"></InputText>
             <label for="telegramCodeInput">Telegram Code</label>
           </FloatLabel>
-          <Message severity="error" v-if="$form.telegramCode?.invalid ?? false"
-            >ID должен быть числом</Message
-          >
-          <Button
-            label="Войти"
-            icon="pi pi-sign-in"
-            :disabled="!$form.valid"
-            @click="loginClick"
-          ></Button>
+          <Message severity="error" v-if="$form.telegramCode?.invalid ?? false">ID должен быть числом</Message>
+          <Button label="Войти" icon="pi pi-sign-in" :disabled="!$form.valid" @click="loginClick"></Button>
         </template>
       </Fluid>
     </Form>
@@ -116,6 +93,6 @@ const loginClick = async () => {
 
     return true;
   });
-  if (result) router.push('/dashboard');
+  if (result) router.push({ name: 'main' });
 };
 </script>

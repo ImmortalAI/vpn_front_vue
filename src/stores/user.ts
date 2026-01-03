@@ -16,7 +16,8 @@ export const useUserStore = defineStore('user', () => {
         user.value = response;
         return true;
       })
-      .catch(() => {
+      .catch((e) => {
+        console.log(e);
         if (user.value) {
           user.value = null;
           console.warn('User was logged out');

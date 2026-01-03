@@ -32,7 +32,7 @@ export const UserSchema = z.object({
   created_date: z.coerce.date(),
   rights: UserRightsSchema,
   settings: UserSettingsSchema,
-  tariff: TariffSchema,
+  tariff: TariffSchema.nullable(),
 });
 
 export type UserRights = z.infer<typeof UserRightsSchema>;

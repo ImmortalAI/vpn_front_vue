@@ -1,5 +1,5 @@
 import { useUserStore } from '@/stores/user';
-import LoginView from '@/views/LoginView.vue';
+import DashboardView from '@/views/DashboardView.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -7,16 +7,16 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'login',
-      component: LoginView,
+      name: 'main',
+      component: DashboardView,
       meta: {
         canRedirectHome: false,
       },
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('@/views/DashboardView.vue'),
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
       meta: {
         canRedirectHome: false,
       },
@@ -56,24 +56,23 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   const user = useUserStore();
 
-  // Try to refresh the user data if not already logged in
   if (!user.loggedIn) {
-    try {
-      await user.refreshUser();
-    } catch (error) {
-      console.log(error);
+    const refreshed = await user.refreshUser();
+    if (!refreshed && to.name !== 'login') {
+      return '/login';
     }
-  }
-
-  if (to.name !== 'login' && !user.loggedIn) {
-    next({ name: 'login' });
-  } else if (to.name === 'login' && user.loggedIn) {
-    next({ name: 'dashboard' });
+    if (refreshed && to.name === 'login') {
+      return '/';
+    }
+    return true;
   } else {
-    next();
+    if (to.name === 'login') {
+      return '/';
+    }
+    return true;
   }
 });
 
