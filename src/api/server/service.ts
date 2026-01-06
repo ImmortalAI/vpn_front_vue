@@ -1,6 +1,13 @@
 // #region imports
 import apiClient from '@/utils/apiClient';
 import {
+  InboundsCountRqSchema,
+  InboundsGetByIdRsSchema,
+  InboundsGetRqSchema,
+  InboundsGetRsSchema,
+  InboundsPatchRqSchema,
+  InboundsPatchRsSchema,
+  InboundsPostRsSchema,
   ServerCountRsSchema,
   ServerGetByIdRqSchema,
   ServerGetByIdRsSchema,
@@ -10,6 +17,15 @@ import {
   ServerPatchRsSchema,
   ServerPostRqSchema,
   ServerPostRsSchema,
+  type InboundsCountRq,
+  type InboundsCountRs,
+  type InboundsGetByIdRs,
+  type InboundsGetRq,
+  type InboundsGetRs,
+  type InboundsPatchRq,
+  type InboundsPatchRs,
+  type InboundsPostRq,
+  type InboundsPostRs,
   type ServerCountRs,
   type ServerGetByIdRq,
   type ServerGetByIdRs,
@@ -20,7 +36,7 @@ import {
   type ServerPostRq,
   type ServerPostRs,
 } from '@/api/server/schema';
-import { UuidSchema } from '@/api/base/schema';
+import { UuidSchema, type Uuid } from '@/api/base/schema';
 // #endregion
 
 /**
@@ -90,4 +106,79 @@ export async function serverIdPatch(
   ServerPatchRqSchema.parse(newData);
   const response = await apiClient.patch(`/servers/${serverID}`, newData);
   return ServerPatchRsSchema.parse(response.data);
+}
+
+/**
+ * Gets the list of all server inbounds (optionally, for a specific server or with pagination).
+ *
+ * @param {InboundsGetRq | undefined} data - The parameters to filter the server inbounds.
+ * @returns {Promise<InboundsGetRs>} The response data with the server inbounds data.
+ * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
+ */
+export async function inboundGet(data?: InboundsGetRq): Promise<InboundsGetRs> {
+  InboundsGetRqSchema.parse(data ?? {});
+  const response = await apiClient.get('/servers/inbounds', {
+    params: data,
+  });
+  return InboundsGetRsSchema.parse(response.data);
+}
+
+/**
+ * Gets the count of all server inbounds (optionally, for a specific server).
+ *
+ * @param {InboundsCountRq | undefined} data - The parameters to filter the server inbounds.
+ * @returns {Promise<InboundsCountRs>} The count of server inbounds.
+ * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
+ */
+export async function inboundCount(data?: InboundsCountRq): Promise<InboundsCountRs> {
+  InboundsCountRqSchema.parse(data ?? {});
+  const response = await apiClient.get('/servers/inbounds/count', {
+    params: data,
+  });
+  return ServerCountRsSchema.parse(response.data);
+}
+
+/**
+ * Creates a new server inbound with the given data for the server with the given UUID.
+ *
+ * @param {Uuid} server_id - The UUID of the server to create the inbound for.
+ * @param {InboundsPostRq} data - The server inbound data.
+ * @returns {Promise<InboundsPostRs>} The response message with the created server inbound data.
+ * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
+ */
+export async function inboundPost(server_id: Uuid, data: InboundsPostRq): Promise<InboundsPostRs> {
+  UuidSchema.parse(server_id);
+  const response = await apiClient.post(`/servers/inbounds/${server_id}`, data);
+  return InboundsPostRsSchema.parse(response.data);
+}
+
+/**
+ * Gets the data of a specific server inbound by his UUID.
+ *
+ * @param {Uuid} server_inbound_id - The UUID of the server inbound to get.
+ * @returns {Promise<InboundsGetByIdRs>} The response data with the server inbound data.
+ * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
+ */
+export async function inboundGetById(server_inbound_id: Uuid): Promise<InboundsGetByIdRs> {
+  UuidSchema.parse(server_inbound_id);
+  const response = await apiClient.get(`/servers/inbounds/${server_inbound_id}`);
+  return InboundsGetByIdRsSchema.parse(response.data);
+}
+
+/**
+ * Updates the server inbound with the given UUID with the given new data.
+ *
+ * @param {string} server_inbound_id - The UUID of the server inbound to update.
+ * @param {InboundsPatchRq} data - The new server inbound data.
+ * @returns {Promise<InboundsPatchRs>} The response message with the updated server inbound data.
+ * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
+ */
+export async function inboundPatch(
+  server_inbound_id: Uuid,
+  data: InboundsPatchRq,
+): Promise<InboundsPatchRs> {
+  UuidSchema.parse(server_inbound_id);
+  InboundsPatchRqSchema.parse(data);
+  const response = await apiClient.patch(`/servers/inbounds/${server_inbound_id}`, data);
+  return InboundsPatchRsSchema.parse(response.data);
 }

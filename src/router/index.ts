@@ -1,76 +1,24 @@
-import { useUserStore } from '@/stores/user';
-import DashboardView from '@/views/DashboardView.vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import routes from '@/router/routes';
+import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'main',
-      component: DashboardView,
-      meta: {
-        canRedirectHome: false,
-      },
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/LoginView.vue'),
-      meta: {
-        canRedirectHome: false,
-      },
-    },
-    {
-      path: '/users',
-      name: 'users',
-      component: () => import('@/views/UsersView.vue'),
-      meta: {
-        canRedirectHome: true,
-      },
-    },
-    {
-      path: '/tariffs',
-      name: 'tariffs',
-      component: () => import('@/views/TariffsView.vue'),
-      meta: {
-        canRedirectHome: true,
-      },
-    },
-    {
-      path: '/servers',
-      name: 'servers',
-      component: () => import('@/views/ServersView.vue'),
-      meta: {
-        canRedirectHome: true,
-      },
-    },
-    {
-      path: '/:pathMatch(.*)*',
-      name: 'not-found',
-      component: () => import('@/views/NotFoundView.vue'),
-      meta: {
-        canRedirectHome: true,
-      },
-    },
-  ],
+  routes: routes,
 });
 
 router.beforeEach(async (to) => {
-  const user = useUserStore();
+  const auth = useAuthStore();
+  if (!auth.isInitialized) await auth.initialize();
 
-  if (!user.loggedIn) {
-    const refreshed = await user.refreshUser();
-    if (!refreshed && to.name !== 'login') {
-      return '/login';
-    }
-    if (refreshed && to.name === 'login') {
+  if (auth.isAuthenticated) {
+    if (to.name === 'login') {
       return '/';
     }
     return true;
   } else {
-    if (to.name === 'login') {
-      return '/';
+    if (to.name !== 'login') {
+      return '/login';
     }
     return true;
   }

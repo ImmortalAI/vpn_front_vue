@@ -1,11 +1,13 @@
+import router from '@/router';
+import { useAuthStore } from '@/stores/auth';
 import axios, { isAxiosError, type InternalAxiosRequestConfig } from 'axios';
-import { useRouter } from 'vue-router';
 
-const RETRY_DELAY = parseInt(import.meta.env.VITE_RETRY_DELAY || '3000', 10);
-const MAX_RETRIES = parseInt(import.meta.env.VITE_RETRY_MAX_ATTEMPTS || '3', 10);
+const RETRY_DELAY = parseInt(import.meta.env.VITE_RETRY_DELAY || '3000');
+const MAX_RETRIES = parseInt(import.meta.env.VITE_RETRY_MAX_ATTEMPTS || '3');
+const BASE_ADDRESS = import.meta.env.VITE_API_URL;
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: BASE_ADDRESS,
   withCredentials: true,
 });
 
@@ -21,16 +23,14 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retryCount) {
       try {
         // Refresh token
-        await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/refresh`,
-          {},
-          { withCredentials: true },
-        );
+        await axios.post(`${BASE_ADDRESS}/auth/refresh`, {}, { withCredentials: true });
 
         // Retry the request if token was refreshed
         return apiClient(originalRequest);
       } catch (refreshErr) {
-        const router = useRouter();
+        const auth = useAuthStore();
+        if (auth.isAuthenticated) auth.user = null;
+
         // Redirect to login page if refresh fails and show a toast message
         router.push({ name: 'login' });
 
