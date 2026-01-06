@@ -1,7 +1,11 @@
 <template>
   <header class="p-4 border-b border-neutral-800 flex justify-between">
-    <span class="text-2xl text-emerald-500 cursor-pointer" @click="router.push('/')">VPN Manager</span>
-    <div><Button v-if="auth.isAuthenticated" @click="logout" icon="pi pi-sign-out" size="small" /></div>
+    <span class="text-2xl text-emerald-500 cursor-pointer" @click="router.push('/')"
+      >VPN Manager</span
+    >
+    <div>
+      <Button v-if="auth.isAuthenticated" @click="logout" icon="pi pi-sign-out" size="small" />
+    </div>
   </header>
 </template>
 

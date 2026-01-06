@@ -1,7 +1,12 @@
 <template>
   <div class="flex flex-col items-center gap-8">
     <p class="text-4xl">Log In</p>
-    <Form v-slot="$form" :resolver :validateOnBlur="true" class="border-2 border-surface-500 p-8 rounded-2xl">
+    <Form
+      v-slot="$form"
+      :resolver
+      :validateOnBlur="true"
+      class="border-2 border-surface-500 p-8 rounded-2xl"
+    >
       <Fluid class="flex flex-col gap-4">
         <InputGroup class="mt-4">
           <FloatLabel>
@@ -9,18 +14,36 @@
             <label for="telegramIdInput">Telegram ID</label>
           </FloatLabel>
           <InputGroupAddon>
-            <Button :icon="iconCodeSend" :disabled="($form.telegramId?.invalid ?? false) || countdown.isActive.value"
-              @click="sendCodeClick" :label="labelCodeSend" :pt="{ label: { class: 'w-6' } }"></Button>
+            <Button
+              :icon="iconCodeSend"
+              :disabled="($form.telegramId?.invalid ?? false) || countdown.isActive.value"
+              @click="sendCodeClick"
+              :label="labelCodeSend"
+              :pt="{ label: { class: 'w-6' } }"
+            ></Button>
           </InputGroupAddon>
         </InputGroup>
-        <Message severity="error" v-if="$form.telegramId?.invalid ?? false">Telegram Id must be a number</Message>
+        <Message severity="error" v-if="$form.telegramId?.invalid ?? false"
+          >Telegram Id must be a number</Message
+        >
         <template v-if="codeSent">
           <FloatLabel class="mt-4">
-            <InputText id="telegramCodeInput" name="telegramCode" v-model="telegramCode"></InputText>
+            <InputText
+              id="telegramCodeInput"
+              name="telegramCode"
+              v-model="telegramCode"
+            ></InputText>
             <label for="telegramCodeInput">Telegram Code</label>
           </FloatLabel>
-          <Message severity="error" v-if="$form.telegramCode?.invalid ?? false">Code must be a number</Message>
-          <Button label="Log Me In" icon="pi pi-sign-in" :disabled="!$form.valid" @click="loginClick"></Button>
+          <Message severity="error" v-if="$form.telegramCode?.invalid ?? false"
+            >Code must be a number</Message
+          >
+          <Button
+            label="Log Me In"
+            icon="pi pi-sign-in"
+            :disabled="!$form.valid"
+            @click="loginClick"
+          ></Button>
         </template>
       </Fluid>
     </Form>
@@ -79,7 +102,10 @@ const sendCodeClick = async () => {
 };
 
 const loginClick = async () => {
-  const result = await auth.login({ tg_id: parseInt(telegramId.value), tg_code: telegramCode.value });
+  const result = await auth.login({
+    tg_id: parseInt(telegramId.value),
+    tg_code: telegramCode.value,
+  });
   if (result.isOk) {
     toast.add({
       severity: 'success',
@@ -87,8 +113,7 @@ const loginClick = async () => {
       life: 3000,
     });
     router.push('/');
-  }
-  else {
+  } else {
     toast.add({
       severity: 'error',
       summary: result.message,

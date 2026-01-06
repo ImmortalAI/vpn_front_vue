@@ -18,16 +18,19 @@ const emits = defineEmits<{
 const ip = ref(props.modelValue || '');
 const isValidIp = computed(() => z.ipv4().safeParse(ip.value).success);
 
-watch(() => props.modelValue, () => {
-  if (z.ipv4().safeParse(props.modelValue).success) {
-    ip.value = props.modelValue || '';
-  }
-})
+watch(
+  () => props.modelValue,
+  () => {
+    if (z.ipv4().safeParse(props.modelValue).success) {
+      ip.value = props.modelValue || '';
+    }
+  },
+);
 
 watch(ip, () => {
   if (ip.value.match(/^(\d{1,3}\.){0,2}\d{3}$/g) != null) {
     ip.value += '.';
   }
   emits('update:modelValue', ip.value);
-})
+});
 </script>
