@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-center items-center mb-[10%]">
+  <div class="flex h-full w-full justify-center items-center mb-[10%]">
     <div class="flex flex-col gap-4 border-2 border-neutral-600 rounded-2xl w-fit h-fit p-8">
       <h1 class="text-4xl font-bold">Dashboard</h1>
       <RouterLink to="/users" class="router-link-btn">Users</RouterLink>

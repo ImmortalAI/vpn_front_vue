@@ -2,14 +2,8 @@
   <Card>
     <template #title>Servers</template>
     <template #content>
-      <DataTable
-        v-model:expandedRows="expandedRows"
-        editMode="cell"
-        :value="servers"
-        dataKey="id"
-        @cellEditComplete="updateDataTable"
-        :loading="loadingTable"
-      >
+      <DataTable v-model:expandedRows="expandedRows" v-model:editingRows="rowsInEdit" editMode="row" :value="servers"
+        dataKey="id" :loading="loadingTable" @row-edit-init="editRowInit" @row-edit-save="console.log">
         <template #loading>
           <div class="flex gap-2">
             <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -38,189 +32,98 @@
             <InputText v-model="data[field]" />
           </template>
         </Column>
+        <Column :rowEditor="true" />
         <template #expansion="slotProps">
-          <div class="flex flex-col">
-            <span class="text-xl p-2 border-b border-neutral-600">Main Settings</span>
-            <FloatLabel class="float-label-spacer">
-              <InputText
-                :inputId="'description-input-' + slotProps.index"
-                v-model="(slotProps.data as Server).description"
-              />
-              <label :for="'description-input-' + slotProps.index">Description</label>
-            </FloatLabel>
-            <div class="flex">
-              <FloatLabel class="float-label-spacer">
-                <DatePicker
-                  v-model="(slotProps.data as Server).starting_date"
-                  :inputId="'start-date-input-' + slotProps.index"
-                  showTime
-                  hourFormat="24"
-                  dateFormat="dd.mm.yy"
-                />
-                <label :for="'start-date-input-' + slotProps.index">Starting Date</label>
-              </FloatLabel>
-              <FloatLabel class="float-label-spacer">
-                <DatePicker
-                  v-model="(slotProps.data as Server).closing_date"
-                  :inputId="'close-date-input-' + slotProps.index"
-                  showTime
-                  hourFormat="24"
-                  dateFormat="dd.mm.yy"
-                />
-                <label :for="'close-date-input-' + slotProps.index">Closing Date</label>
-              </FloatLabel>
-            </div>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-xl p-2 border-b border-neutral-600">Panel Settings</span>
-            <div class="flex">
-              <FloatLabel class="float-label-spacer">
-                <InputNumber
-                  :inputId="'port-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).panel_port"
-                  :useGrouping="false"
-                  :min="0"
-                  :max="65535"
-                />
-                <label :for="'port-input-' + slotProps.index">Port</label>
-              </FloatLabel>
-              <FloatLabel class="float-label-spacer">
-                <InputText
-                  :inputId="'web-path-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).panel_web_path"
-                />
-                <label :for="'web-path-input-' + slotProps.index">Web Path</label>
-              </FloatLabel>
-            </div>
-            <div class="flex">
-              <FloatLabel class="float-label-spacer">
-                <InputText
-                  :inputId="'login-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).panel_login"
-                />
-                <label :for="'login-input-' + slotProps.index">Web Path</label>
-              </FloatLabel>
-              <FloatLabel class="float-label-spacer">
-                <InputText
-                  :inputId="'password-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).panel_password"
-                />
-                <label :for="'password-input-' + slotProps.index">Web Path</label>
-              </FloatLabel>
-            </div>
-            <FloatLabel class="float-label-spacer">
-              <InputText
-                :inputId="'description-input-' + slotProps.index"
-                v-model="(slotProps.data as Server).description"
-              />
-              <label :for="'description-input-' + slotProps.index">Description</label>
-            </FloatLabel>
-            <div class="flex">
-              <FloatLabel class="float-label-spacer">
-                <DatePicker
-                  v-model="(slotProps.data as Server).starting_date"
-                  :inputId="'start-date-input-' + slotProps.index"
-                  showTime
-                  hourFormat="24"
-                  dateFormat="dd.mm.yy"
-                />
-                <label :for="'start-date-input-' + slotProps.index">Starting Date</label>
-              </FloatLabel>
-              <FloatLabel class="float-label-spacer">
-                <DatePicker
-                  v-model="(slotProps.data as Server).closing_date"
-                  :inputId="'close-date-input-' + slotProps.index"
-                  showTime
-                  hourFormat="24"
-                  dateFormat="dd.mm.yy"
-                />
-                <label :for="'close-date-input-' + slotProps.index">Closing Date</label>
-              </FloatLabel>
-            </div>
-          </div>
-          <span>HELLO</span>
-          <div class="flex">
+          <Fluid v-if="rowsInEdit.includes(slotProps.data)" class="flex flex-col gap-4">
             <div class="flex flex-col">
+              <span class="text-xl p-2 border-b border-neutral-600">Main Settings</span>
               <FloatLabel class="float-label-spacer">
-                <InputNumber
-                  :inputId="'port-gen-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).port_generator_port"
-                  :useGrouping="false"
-                  :min="0"
-                  :max="65535"
-                />
-                <label :for="'port-gen-input-' + slotProps.index">Port generator</label>
+                <InputText :inputId="'description-input-' + slotProps.index"
+                  v-model="rowsInEdit.find(row => row.id === slotProps.data.id)!.description" />
+                <label :for="'description-input-' + slotProps.index">Description</label>
               </FloatLabel>
-              <FloatLabel class="float-label-spacer">
-                <InputText
-                  :inputId="'web-path-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).web_path"
-                />
-                <label :for="'web-path-input-' + slotProps.index">Web path</label>
-              </FloatLabel>
+              <div class="flex gap-4">
+                <FloatLabel class="float-label-spacer">
+                  <DatePicker v-model="rowsInEdit.find(row => row.id === slotProps.data.id)!.starting_date"
+                    :inputId="'start-date-input-' + slotProps.index" showTime hourFormat="24" dateFormat="dd.mm.yy" />
+                  <label :for="'start-date-input-' + slotProps.index">Starting Date</label>
+                </FloatLabel>
+                <FloatLabel class="float-label-spacer">
+                  <DatePicker v-model="rowsInEdit.find(row => row.id === slotProps.data.id)!.closing_date"
+                    :inputId="'close-date-input-' + slotProps.index" showTime hourFormat="24" dateFormat="dd.mm.yy" />
+                  <label :for="'close-date-input-' + slotProps.index">Closing Date</label>
+                </FloatLabel>
+              </div>
             </div>
             <div class="flex flex-col">
-              <FloatLabel class="float-label-spacer">
-                <InputText
-                  :inputId="'panel-login-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).login"
-                />
-                <label :for="'panel-login-input-' + slotProps.index">Panel login</label>
-              </FloatLabel>
-              <FloatLabel class="float-label-spacer">
-                <InputText
-                  :inputId="'panel-password-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).password"
-                />
-                <label :for="'panel-password-input-' + slotProps.index">Panel password</label>
-              </FloatLabel>
+              <span class="text-xl p-2 border-b border-neutral-600">Panel Settings</span>
+              <div class="flex gap-4">
+                <FloatLabel class="float-label-spacer">
+                  <InputNumber :inputId="'port-input-' + slotProps.index"
+                    v-model="rowsInEdit.find(row => row.id === slotProps.data.id)!.panel_port" :useGrouping="false"
+                    :min="0" :max="65535" />
+                  <label :for="'port-input-' + slotProps.index">Port</label>
+                </FloatLabel>
+                <FloatLabel class="float-label-spacer">
+                  <InputText :inputId="'web-path-input-' + slotProps.index"
+                    v-model="rowsInEdit.find(row => row.id === slotProps.data.id)!.panel_web_path" />
+                  <label :for="'web-path-input-' + slotProps.index">Web Path</label>
+                </FloatLabel>
+              </div>
+              <div class="flex gap-4">
+                <FloatLabel class="float-label-spacer">
+                  <InputText :inputId="'login-input-' + slotProps.index"
+                    v-model="rowsInEdit.find(row => row.id === slotProps.data.id)!.panel_login" />
+                  <label :for="'login-input-' + slotProps.index">Panel Login</label>
+                </FloatLabel>
+                <FloatLabel class="float-label-spacer">
+                  <InputText :inputId="'password-input-' + slotProps.index"
+                    v-model="rowsInEdit.find(row => row.id === slotProps.data.id)!.panel_password" />
+                  <label :for="'password-input-' + slotProps.index">Panel Password</label>
+                </FloatLabel>
+              </div>
+            </div>
+          </Fluid>
+          <div v-else class="flex flex-col gap-4">
+            <div class="flex flex-col">
+              <span class="text-xl p-2 border-b border-neutral-600">Main Settings</span>
+              <div class="static-data-container">
+                <p class="underline">Description</p>
+                <p>{{ (slotProps.data as Server).description }}</p>
+              </div>
+              <div class="flex gap-8">
+                <div class="static-data-container">
+                  <p class="underline">Starting Date</p>
+                  <p>{{ formatRuDateTime((slotProps.data as Server).starting_date) }}</p>
+                </div>
+                <div class="static-data-container">
+                  <p class="underline">Closing Date</p>
+                  <p>{{ formatRuDateTime((slotProps.data as Server).closing_date) }}</p>
+                </div>
+              </div>
             </div>
             <div class="flex flex-col">
-              <FloatLabel class="float-label-spacer">
-                <InputNumber
-                  :inputId="'vless-id-input-' + slotProps.index"
-                  :useGrouping="false"
-                  v-model="(slotProps.data as Server).vless_reality_id"
-                />
-                <label :for="'vless-id-input-' + slotProps.index">Vless ID</label>
-              </FloatLabel>
-              <FloatLabel class="float-label-spacer">
-                <InputNumber
-                  :inputId="'vless-port-input-' + slotProps.index"
-                  :useGrouping="false"
-                  v-model="(slotProps.data as Server).vless_reality_id"
-                  :min="0"
-                  :max="65535"
-                />
-                <label :for="'vless-port-input-' + slotProps.index">Vless port</label>
-              </FloatLabel>
-            </div>
-            <div class="flex flex-col">
-              <FloatLabel class="float-label-spacer">
-                <InputText
-                  :inputId="'vless-domain-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).vless_reality_domain_short_id"
-                />
-                <label :for="'vless-domain-input-' + slotProps.index">Vless domain ID</label>
-              </FloatLabel>
-              <FloatLabel class="float-label-spacer">
-                <InputText
-                  :inputId="'vless-pubkey-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).vless_reality_public_key"
-                />
-                <label :for="'vless-pubkey-input-' + slotProps.index"
-                  >Vless reality public key</label
-                >
-              </FloatLabel>
-            </div>
-            <div class="flex flex-col">
-              <FloatLabel class="float-label-spacer">
-                <InputText
-                  :inputId="'vless-key-input-' + slotProps.index"
-                  v-model="(slotProps.data as Server).vless_reality_private_key"
-                />
-                <label :for="'vless-key-input-' + slotProps.index">Vless reality private key</label>
-              </FloatLabel>
+              <span class="text-xl p-2 border-b border-neutral-600">Panel Settings</span>
+              <div class="flex gap-8">
+                <div class="static-data-container">
+                  <p class="underline">Port</p>
+                  <p>{{ (slotProps.data as Server).panel_port }}</p>
+                </div>
+                <div class="static-data-container">
+                  <p class="underline">Web Path</p>
+                  <p>{{ (slotProps.data as Server).panel_web_path }}</p>
+                </div>
+              </div>
+              <div class="flex gap-8">
+                <div class="static-data-container">
+                  <p class="underline">Panel Login</p>
+                  <p>{{ (slotProps.data as Server).panel_login }}</p>
+                </div>
+                <div class="static-data-container">
+                  <p class="underline">Panel Password</p>
+                  <p>{{ (slotProps.data as Server).panel_password }}</p>
+                </div>
+              </div>
             </div>
           </div>
         </template>
@@ -237,7 +140,9 @@ import { serverGet, serverIdPatch, serverPost } from '@/api/server/service';
 import useErrorToast from '@/composables/useErrorToast';
 import {
   type DataTableCellEditCompleteEvent,
+  type DataTableEditingRows,
   type DataTableExpandedRows,
+  type DataTableRowEditInitEvent,
 } from 'primevue/datatable';
 import { onMounted, ref } from 'vue';
 import { Icon } from '@iconify/vue';
@@ -251,6 +156,18 @@ import IpInput from '@/components/IpInput.vue';
 const errorToast = useErrorToast();
 
 // #endregion
+
+// FUN FACT:
+// Docs says that editingRows prop uses DataTableEditingRows type
+// Typescript says same thing
+// BUT in reality it doesn't, it just contains an array of objects from value prop
+// So if you read this, please NEVER use a PrimeVue as your component library
+// It's a piece of garbage made by fools for other fools (imho, don't judge me)
+const rowsInEdit = ref<Server[]>([]);
+
+const editRowInit = (event: DataTableRowEditInitEvent<Server>) => {
+  console.log(event);
+}
 
 const updateDataTable = async (event: DataTableCellEditCompleteEvent<Server>) => {
   //const result = await errorToast.safeExecute(async () => {
@@ -275,11 +192,11 @@ const createServer = async () => {
       starting_date: new Date(),
       closing_date: new Date(),
       secured: true,
-      description: '',
-      panel_login: '',
-      panel_password: '',
-      panel_port: 0,
-      panel_web_path: '',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla eget ipsum consequat fringilla. Donec id elit non mi porta gravida at eget metus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.',
+      panel_login: 'ABOBA',
+      panel_password: 'aboba',
+      panel_port: 25565,
+      panel_web_path: '/aboba',
       display_name: `TEST SERVER ${Math.round(Math.random() * 1000)}`,
     });
   }
@@ -304,11 +221,11 @@ onMounted(async () => {
       starting_date: new Date(),
       closing_date: new Date(),
       secured: true,
-      description: '',
-      panel_login: '',
-      panel_password: '',
-      panel_port: 0,
-      panel_web_path: '',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla eget ipsum consequat fringilla. Donec id elit non mi porta gravida at eget metus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.',
+      panel_login: 'ABOBA',
+      panel_password: 'aboba',
+      panel_port: 25565,
+      panel_web_path: '/aboba',
       display_name: 'TEST SERVER',
     },
   ];
@@ -324,5 +241,9 @@ onMounted(async () => {
 
 .float-label-spacer {
   @apply mt-8 w-64;
+}
+
+.static-data-container {
+  @apply flex flex-col gap-2
 }
 </style>

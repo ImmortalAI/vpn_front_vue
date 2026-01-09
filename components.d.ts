@@ -16,6 +16,7 @@ declare module 'vue' {
     Checkbox: typeof import('primevue/checkbox')['default']
     Column: typeof import('primevue/column')['default']
     DataTable: typeof import('primevue/datatable')['default']
+    DatePicker: typeof import('primevue/datepicker')['default']
     Dialog: typeof import('primevue/dialog')['default']
     Divider: typeof import('primevue/divider')['default']
     FloatLabel: typeof import('primevue/floatlabel')['default']
@@ -32,6 +33,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Select: typeof import('primevue/select')['default']
+    ServerEditDialog: typeof import('./src/components/Dialogs/ServerEditDialog.vue')['default']
     Skeleton: typeof import('primevue/skeleton')['default']
     Toast: typeof import('primevue/toast')['default']
   }
