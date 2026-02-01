@@ -5,11 +5,10 @@ import { TariffSchema } from '@/api/tariff/schema';
 // #endregion
 
 export const UserRightsSchema = z.object({
-  is_server_editor: z.boolean(),
-  is_user_editor: z.boolean(),
-  is_transaction_editor: z.boolean(),
-  is_active_period_editor: z.boolean(),
-  is_tariff_editor: z.boolean(),
+  is_servers_editor: z.boolean(),
+  is_users_editor: z.boolean(),
+  is_transactions_editor: z.boolean(),
+  is_tariffs_editor: z.boolean(),
   is_member_rights_editor: z.boolean(),
   is_admin_rights_editor: z.boolean(),
   is_control_panel_user: z.boolean(),
@@ -20,6 +19,7 @@ export const UserSettingsSchema = z.object({
   auto_pay: z.boolean(),
   is_active: z.boolean(),
   get_traffic_notifications: z.boolean(),
+  language_code: z.string(),
 });
 
 export const UserSchema = z.object({

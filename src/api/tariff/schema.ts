@@ -7,10 +7,12 @@ export const TariffSchema = z.object({
   id: z.uuid(),
   name: z.string(),
   description: z.string(),
-  duration: z.number(),
-  price: z.number(),
-  price_of_traffic_reset: z.number(),
-  traffic: z.number(),
+  duration: z.number().int().nonnegative(),
+  price: z.number().int().nonnegative(),
+  price_of_traffic_reset: z.number().int().nonnegative(),
+  traffic: z.number().int().nonnegative(),
+  with_access: z.boolean(),
+  with_unavailable_inbounds: z.boolean(),
   is_special: z.boolean(),
 });
 
