@@ -4,11 +4,7 @@ import {
   type AuthTgCodeRs,
   type AuthLoginRq,
   type AuthTgCodeRq,
-  AuthLoginRsSchema,
-  AuthTgCodeRsSchema,
   type AuthLoginRs,
-  AuthLogoutRsSchema,
-  AuthRefreshRsSchema,
   type AuthRefreshRs,
   type AuthLogoutRs,
   AuthTgCodeRqSchema,
@@ -25,8 +21,8 @@ import {
  */
 export async function authTgCode(request: AuthTgCodeRq): Promise<AuthTgCodeRs> {
   AuthTgCodeRqSchema.parse(request);
-  const response = await apiClient.post('/auth/tg_code', request);
-  return AuthTgCodeRsSchema.parse(response.data);
+  const response = await apiClient.post<AuthTgCodeRs>('/auth/tg_code', request);
+  return response.data;
 }
 
 /**
@@ -38,8 +34,8 @@ export async function authTgCode(request: AuthTgCodeRq): Promise<AuthTgCodeRs> {
  */
 export async function authLogin(request: AuthLoginRq): Promise<AuthLoginRs> {
   AuthLoginRqSchema.parse(request);
-  const response = await apiClient.post('/auth/login', request);
-  return AuthLoginRsSchema.parse(response.data);
+  const response = await apiClient.post<AuthLoginRs>('/auth/login', request);
+  return response.data;
 }
 
 /**
@@ -49,8 +45,8 @@ export async function authLogin(request: AuthLoginRq): Promise<AuthLoginRs> {
  * @throws {AxiosError | ZodError} If the request fails.
  */
 export async function authRefresh(): Promise<AuthRefreshRs> {
-  const response = await apiClient.get('/auth/refresh');
-  return AuthRefreshRsSchema.parse(response.data);
+  const response = await apiClient.get<AuthRefreshRs>('/auth/refresh');
+  return response.data;
 }
 
 /**
@@ -60,6 +56,6 @@ export async function authRefresh(): Promise<AuthRefreshRs> {
  * @throws {AxiosError | ZodError} If the request fails.
  */
 export async function authLogout(): Promise<AuthLogoutRs> {
-  const response = await apiClient.post('/auth/logout');
-  return AuthLogoutRsSchema.parse(response.data);
+  const response = await apiClient.post<AuthLogoutRs>('/auth/logout');
+  return response.data;
 }

@@ -2,21 +2,12 @@
 import apiClient from '@/utils/apiClient';
 import {
   InboundsCountRqSchema,
-  InboundsGetByIdRsSchema,
   InboundsGetRqSchema,
-  InboundsGetRsSchema,
   InboundsPatchRqSchema,
-  InboundsPatchRsSchema,
-  InboundsPostRsSchema,
-  ServerCountRsSchema,
   ServerGetByIdRqSchema,
-  ServerGetByIdRsSchema,
   ServerGetRqSchema,
-  ServerGetRsSchema,
   ServerPatchRqSchema,
-  ServerPatchRsSchema,
   ServerPostRqSchema,
-  ServerPostRsSchema,
   type InboundsCountRq,
   type InboundsCountRs,
   type InboundsGetByIdRs,
@@ -47,10 +38,10 @@ import { UuidSchema, type Uuid } from '@/api/base/schema';
  */
 export async function serverGet(data?: ServerGetRq): Promise<ServerGetRs> {
   ServerGetRqSchema.parse(data ?? {});
-  const response = await apiClient.get('/servers', {
+  const response = await apiClient.get<ServerGetRs>('/servers', {
     params: data,
   });
-  return ServerGetRsSchema.parse(response.data);
+  return response.data;
 }
 
 /**
@@ -62,8 +53,8 @@ export async function serverGet(data?: ServerGetRq): Promise<ServerGetRs> {
  */
 export async function serverPost(data: ServerPostRq): Promise<ServerPostRs> {
   ServerPostRqSchema.parse(data);
-  const response = await apiClient.post('/servers', data);
-  return ServerPostRsSchema.parse(response.data);
+  const response = await apiClient.post<ServerPostRs>('/servers', data);
+  return response.data;
 }
 
 /**
@@ -73,8 +64,8 @@ export async function serverPost(data: ServerPostRq): Promise<ServerPostRs> {
  * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
  */
 export async function serverCount(): Promise<ServerCountRs> {
-  const response = await apiClient.get('/servers/count');
-  return ServerCountRsSchema.parse(response.data);
+  const response = await apiClient.get<ServerCountRs>('/servers/count');
+  return response.data;
 }
 
 /**
@@ -86,8 +77,8 @@ export async function serverCount(): Promise<ServerCountRs> {
  */
 export async function serverGetById(data: ServerGetByIdRq): Promise<ServerGetByIdRs> {
   ServerGetByIdRqSchema.parse(data);
-  const response = await apiClient.get(`/servers/${data.server_id}`);
-  return ServerGetByIdRsSchema.parse(response.data);
+  const response = await apiClient.get<ServerGetByIdRs>(`/servers/${data.server_id}`);
+  return response.data;
 }
 
 /**
@@ -104,8 +95,8 @@ export async function serverIdPatch(
 ): Promise<ServerPatchRs> {
   UuidSchema.parse(serverID);
   ServerPatchRqSchema.parse(newData);
-  const response = await apiClient.patch(`/servers/${serverID}`, newData);
-  return ServerPatchRsSchema.parse(response.data);
+  const response = await apiClient.patch<ServerPatchRs>(`/servers/${serverID}`, newData);
+  return response.data;
 }
 
 /**
@@ -117,10 +108,10 @@ export async function serverIdPatch(
  */
 export async function inboundGet(data?: InboundsGetRq): Promise<InboundsGetRs> {
   InboundsGetRqSchema.parse(data ?? {});
-  const response = await apiClient.get('/servers/inbounds', {
+  const response = await apiClient.get<InboundsGetRs>('/servers/inbounds', {
     params: data,
   });
-  return InboundsGetRsSchema.parse(response.data);
+  return response.data;
 }
 
 /**
@@ -132,10 +123,10 @@ export async function inboundGet(data?: InboundsGetRq): Promise<InboundsGetRs> {
  */
 export async function inboundCount(data?: InboundsCountRq): Promise<InboundsCountRs> {
   InboundsCountRqSchema.parse(data ?? {});
-  const response = await apiClient.get('/servers/inbounds/count', {
+  const response = await apiClient.get<InboundsCountRs>('/servers/inbounds/count', {
     params: data,
   });
-  return ServerCountRsSchema.parse(response.data);
+  return response.data;
 }
 
 /**
@@ -148,8 +139,8 @@ export async function inboundCount(data?: InboundsCountRq): Promise<InboundsCoun
  */
 export async function inboundPost(server_id: Uuid, data: InboundsPostRq): Promise<InboundsPostRs> {
   UuidSchema.parse(server_id);
-  const response = await apiClient.post(`/servers/inbounds/${server_id}`, data);
-  return InboundsPostRsSchema.parse(response.data);
+  const response = await apiClient.post<InboundsPostRs>(`/servers/inbounds/${server_id}`, data);
+  return response.data;
 }
 
 /**
@@ -161,8 +152,8 @@ export async function inboundPost(server_id: Uuid, data: InboundsPostRq): Promis
  */
 export async function inboundGetById(server_inbound_id: Uuid): Promise<InboundsGetByIdRs> {
   UuidSchema.parse(server_inbound_id);
-  const response = await apiClient.get(`/servers/inbounds/${server_inbound_id}`);
-  return InboundsGetByIdRsSchema.parse(response.data);
+  const response = await apiClient.get<InboundsGetByIdRs>(`/servers/inbounds/${server_inbound_id}`);
+  return response.data;
 }
 
 /**
@@ -179,6 +170,9 @@ export async function inboundPatch(
 ): Promise<InboundsPatchRs> {
   UuidSchema.parse(server_inbound_id);
   InboundsPatchRqSchema.parse(data);
-  const response = await apiClient.patch(`/servers/inbounds/${server_inbound_id}`, data);
-  return InboundsPatchRsSchema.parse(response.data);
+  const response = await apiClient.patch<InboundsPatchRs>(
+    `/servers/inbounds/${server_inbound_id}`,
+    data,
+  );
+  return response.data;
 }

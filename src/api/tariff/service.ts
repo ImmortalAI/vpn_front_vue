@@ -1,13 +1,8 @@
 // #region imports
 import apiClient from '@/utils/apiClient';
 import {
-  TariffAllGetRsSchema,
-  TariffDeleteRsSchema,
-  TariffGetRsSchema,
   TariffPatchRqSchema,
-  TariffPatchRsSchema,
   TariffPostRqSchema,
-  TariffPostRsSchema,
   type TariffAllGetRs,
   type TariffDeleteRs,
   type TariffGetRs,
@@ -26,8 +21,8 @@ import { UuidSchema } from '../base/schema';
  * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
  */
 export async function tariffAll(): Promise<TariffAllGetRs> {
-  const response = await apiClient.get('/tariffs');
-  return TariffAllGetRsSchema.parse(response.data);
+  const response = await apiClient.get<TariffAllGetRs>('/tariffs');
+  return response.data;
 }
 
 /**
@@ -39,8 +34,8 @@ export async function tariffAll(): Promise<TariffAllGetRs> {
  */
 export async function tariffGet(tariffId: string): Promise<TariffGetRs> {
   UuidSchema.parse(tariffId);
-  const response = await apiClient.get(`/tariffs/${tariffId}`);
-  return TariffGetRsSchema.parse(response.data);
+  const response = await apiClient.get<TariffGetRs>(`/tariffs/${tariffId}`);
+  return response.data;
 }
 
 /**
@@ -52,8 +47,8 @@ export async function tariffGet(tariffId: string): Promise<TariffGetRs> {
  */
 export async function tariffPost(request: TariffPostRq): Promise<TariffPostRs> {
   TariffPostRqSchema.parse(request);
-  const response = await apiClient.post('/tariffs', request);
-  return TariffPostRsSchema.parse(response.data);
+  const response = await apiClient.post<TariffPostRs>('/tariffs', request);
+  return response.data;
 }
 
 /**
@@ -70,8 +65,8 @@ export async function tariffPatch(
 ): Promise<TariffPatchRs> {
   UuidSchema.parse(tariffId);
   TariffPatchRqSchema.parse(request);
-  const response = await apiClient.patch(`/tariffs/${tariffId}`, request);
-  return TariffPatchRsSchema.parse(response.data);
+  const response = await apiClient.patch<TariffPatchRs>(`/tariffs/${tariffId}`, request);
+  return response.data;
 }
 
 /**
@@ -83,6 +78,6 @@ export async function tariffPatch(
  */
 export async function tariffDelete(tariffId: string): Promise<TariffDeleteRs> {
   UuidSchema.parse(tariffId);
-  const response = await apiClient.delete(`/tariffs/${tariffId}`);
-  return TariffDeleteRsSchema.parse(response.data);
+  const response = await apiClient.delete<TariffDeleteRs>(`/tariffs/${tariffId}`);
+  return response.data;
 }

@@ -2,7 +2,6 @@
 import apiClient from '@/utils/apiClient';
 import {
   NotificationPostRqSchema,
-  NotificationPostRsSchema,
   type NotificationPostRq,
   type NotificationPostRs,
 } from '@/api/notifications/schema';
@@ -17,6 +16,6 @@ import {
  */
 export async function notificationPost(request: NotificationPostRq): Promise<NotificationPostRs> {
   NotificationPostRqSchema.parse(request);
-  const response = await apiClient.post('/notifications', request);
-  return NotificationPostRsSchema.parse(response.data);
+  const response = await apiClient.post<NotificationPostRs>('/notifications', request);
+  return response.data;
 }

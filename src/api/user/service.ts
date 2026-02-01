@@ -1,14 +1,9 @@
 // #region imports
 import apiClient from '@/utils/apiClient';
 import {
-  UserCountRsSchema,
   UserGetByIdRqSchema,
-  UserGetByIdRsSchema,
   UserGetRqSchema,
-  UserGetRsSchema,
   UserPatchRqSchema,
-  UserPatchRsSchema,
-  UserSelfGetRsSchema,
   type UserCountRs,
   type UserGetByIdRq,
   type UserGetByIdRs,
@@ -30,10 +25,10 @@ import { UuidSchema, type Uuid } from '@/api/base/schema';
  */
 export async function userGet(data?: UserGetRq): Promise<UserGetRs> {
   UserGetRqSchema.parse(data ?? {});
-  const response = await apiClient.get('/users', {
+  const response = await apiClient.get<UserGetRs>('/users', {
     params: data ?? {},
   });
-  return UserGetRsSchema.parse(response.data);
+  return response.data;
 }
 
 /**
@@ -43,8 +38,8 @@ export async function userGet(data?: UserGetRq): Promise<UserGetRs> {
  * @throws {AxiosError | ZodError} If the request fails.
  */
 export async function userCount(): Promise<UserCountRs> {
-  const response = await apiClient.get(`/users/count`);
-  return UserCountRsSchema.parse(response.data);
+  const response = await apiClient.get<UserCountRs>(`/users/count`);
+  return response.data;
 }
 
 /**
@@ -58,8 +53,8 @@ export async function userCount(): Promise<UserCountRs> {
 export async function userPatch(userId: Uuid, request: UserPatchRq): Promise<UserPatchRs> {
   UuidSchema.parse(userId);
   UserPatchRqSchema.parse(request);
-  const response = await apiClient.patch(`/users/${userId}`, request);
-  return UserPatchRsSchema.parse(response.data);
+  const response = await apiClient.patch<UserPatchRs>(`/users/${userId}`, request);
+  return response.data;
 }
 
 /**
@@ -71,8 +66,8 @@ export async function userPatch(userId: Uuid, request: UserPatchRq): Promise<Use
  */
 export async function userGetById(data: UserGetByIdRq): Promise<UserGetByIdRs> {
   UserGetByIdRqSchema.parse(data);
-  const response = await apiClient.get(`/users/${data.user_id}`);
-  return UserGetByIdRsSchema.parse(response.data);
+  const response = await apiClient.get<UserGetByIdRs>(`/users/${data.user_id}`);
+  return response.data;
 }
 
 /**
@@ -82,6 +77,6 @@ export async function userGetById(data: UserGetByIdRq): Promise<UserGetByIdRs> {
  * @throws {AxiosError | ZodError} If the request fails.
  */
 export async function userSelf(): Promise<UserSelfGetRs> {
-  const response = await apiClient.get('/users/me');
-  return UserSelfGetRsSchema.parse(response.data);
+  const response = await apiClient.get<UserSelfGetRs>('/users/me');
+  return response.data;
 }

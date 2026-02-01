@@ -1,12 +1,9 @@
 // #region imports
 import apiClient from '@/utils/apiClient';
 import {
-  TransactionAllGetRsSchema,
   TransactionCountRqSchema,
-  TransactionCountRsSchema,
   TransactionGetRqSchema,
   TransactionPostRqSchema,
-  TransactionPostRsSchema,
   type TransactionAllGetRs,
   type TransactionCountRq,
   type TransactionCountRs,
@@ -27,8 +24,8 @@ export async function transactionPost(
   transactionData: TransactionPostRq,
 ): Promise<TransactionPostRs> {
   TransactionPostRqSchema.parse(transactionData);
-  const response = await apiClient.post('/transactions', transactionData);
-  return TransactionPostRsSchema.parse(response.data);
+  const response = await apiClient.post<TransactionPostRs>('/transactions', transactionData);
+  return response.data;
 }
 
 /**
@@ -40,10 +37,10 @@ export async function transactionPost(
  */
 export async function transactionGet(data?: TransactionGetRq): Promise<TransactionAllGetRs> {
   TransactionGetRqSchema.parse(data ?? {});
-  const response = await apiClient.get('/transactions', {
+  const response = await apiClient.get<TransactionAllGetRs>('/transactions', {
     params: data ?? {},
   });
-  return TransactionAllGetRsSchema.parse(response.data);
+  return response.data;
 }
 
 /**
@@ -57,8 +54,8 @@ export async function transactionCount(
   data: TransactionCountRq | undefined,
 ): Promise<TransactionCountRs> {
   TransactionCountRqSchema.parse(data ?? {});
-  const response = await apiClient.get('/transactions/count', {
+  const response = await apiClient.get<TransactionCountRs>('/transactions/count', {
     params: data ?? {},
   });
-  return TransactionCountRsSchema.parse(response.data);
+  return response.data;
 }

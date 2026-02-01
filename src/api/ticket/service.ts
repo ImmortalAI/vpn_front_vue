@@ -1,11 +1,7 @@
 // #region imports
 import apiClient from '@/utils/apiClient';
 import {
-  TicketCloseTicketPatchRsSchema,
-  TicketGetByIdRsSchema,
-  TicketGetRsSchema,
   TicketNewMessageRqSchema,
-  TicketNewMessageRsSchema,
   type TicketCloseTicketPatchRs,
   type TicketGetByIdRs,
   type TicketGetRs,
@@ -22,8 +18,8 @@ import { UuidSchema, type Uuid } from '@/api/base/schema';
  * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
  */
 export async function ticketGet(): Promise<TicketGetRs> {
-  const response = await apiClient.get('/tickets');
-  return TicketGetRsSchema.parse(response.data);
+  const response = await apiClient.get<TicketGetRs>('/tickets');
+  return response.data;
 }
 
 /**
@@ -35,8 +31,8 @@ export async function ticketGet(): Promise<TicketGetRs> {
  */
 export async function ticketGetById(ticketID: string): Promise<TicketGetByIdRs> {
   UuidSchema.parse(ticketID);
-  const response = await apiClient.get(`/tickets/${ticketID}`);
-  return TicketGetByIdRsSchema.parse(response.data);
+  const response = await apiClient.get<TicketGetByIdRs>(`/tickets/${ticketID}`);
+  return response.data;
 }
 
 /**
@@ -53,8 +49,11 @@ export async function ticketNewMessage(
 ): Promise<TicketNewMessageRs> {
   UuidSchema.parse(ticketID);
   TicketNewMessageRqSchema.parse(message);
-  const response = await apiClient.post(`/tickets/${ticketID}/messages`, message);
-  return TicketNewMessageRsSchema.parse(response.data);
+  const response = await apiClient.post<TicketNewMessageRs>(
+    `/tickets/${ticketID}/messages`,
+    message,
+  );
+  return response.data;
 }
 
 /**
@@ -66,6 +65,6 @@ export async function ticketNewMessage(
  */
 export async function ticketCloseTicket(ticketID: Uuid): Promise<TicketCloseTicketPatchRs> {
   UuidSchema.parse(ticketID);
-  const response = await apiClient.patch(`/tickets/${ticketID}/close`);
-  return TicketCloseTicketPatchRsSchema.parse(response.data);
+  const response = await apiClient.patch<TicketCloseTicketPatchRs>(`/tickets/${ticketID}/close`);
+  return response.data;
 }
