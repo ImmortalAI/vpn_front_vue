@@ -3,8 +3,13 @@
     <Card>
       <template #title>Tariffs </template>
       <template #content>
-        <DataTable editMode="cell" :value="tariffs" dataKey="id" @cellEditComplete="onUpdateFieldTariff"
-          :loading="dataTableLoading">
+        <DataTable
+          editMode="cell"
+          :value="tariffs"
+          dataKey="id"
+          @cellEditComplete="onUpdateFieldTariff"
+          :loading="dataTableLoading"
+        >
           <template #loading>
             <div class="flex gap-2">
               <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -18,9 +23,11 @@
           </template>
           <Column field="id" header="Id">
             <template #body="slotProps">
-              <span class="cursor-pointer" @click="copyGuid(slotProps.data.id as string)">{{ (slotProps.data.id as
-                string).slice(0, 8) +
-                ' *** ' + (slotProps.data.id as string).slice(-4) }}</span>
+              <span class="cursor-pointer" @click="copyGuid(slotProps.data.id as string)">{{
+                (slotProps.data.id as string).slice(0, 8) +
+                ' *** ' +
+                (slotProps.data.id as string).slice(-4)
+              }}</span>
             </template>
           </Column>
           <Column field="name" header="Name">
@@ -40,28 +47,49 @@
           </Column>
           <Column field="traffic" header="Traffic (GiB)">
             <template #editor="{ data }">
-              <InputNumber v-model="(data as Tariff).traffic" :useGrouping="false" :min="0" suffix=" GiB" />
+              <InputNumber
+                v-model="(data as Tariff).traffic"
+                :useGrouping="false"
+                :min="0"
+                suffix=" GiB"
+              />
             </template>
           </Column>
           <Column field="price_of_traffic_reset" header="Price (Reset)">
             <template #editor="{ data }">
-              <InputNumber v-model="(data as Tariff).price_of_traffic_reset" mode="currency" currency="RUB" />
+              <InputNumber
+                v-model="(data as Tariff).price_of_traffic_reset"
+                mode="currency"
+                currency="RUB"
+              />
             </template>
           </Column>
           <Column header="Manage">
             <template #body="slotProps">
               <div class="flex gap-4">
-                <Button icon="pi pi-pencil" class="p-button-success" size="small"
-                  @click="onEditTariff(slotProps.data as Tariff)" />
-                <Button icon="pi pi-trash" class="p-button-danger" size="small"
-                  @click="apiDeleteTariff((slotProps.data as Tariff).id)" />
+                <Button
+                  icon="pi pi-pencil"
+                  class="p-button-success"
+                  size="small"
+                  @click="onEditTariff(slotProps.data as Tariff)"
+                />
+                <Button
+                  icon="pi pi-trash"
+                  class="p-button-danger"
+                  size="small"
+                  @click="apiDeleteTariff((slotProps.data as Tariff).id)"
+                />
               </div>
             </template>
           </Column>
         </DataTable>
       </template>
     </Card>
-    <TariffEditDialog v-model:visible="editDialogVisible" :tariff="tariffInEdit" @saveTariff="onTariffUpdate" />
+    <TariffEditDialog
+      v-model:visible="editDialogVisible"
+      :tariff="tariffInEdit"
+      @saveTariff="onTariffUpdate"
+    />
   </div>
 </template>
 
@@ -102,7 +130,7 @@ const onCreateTariff = async () => {
 const onEditTariff = async (tariff: Tariff) => {
   editDialogVisible.value = true;
   tariffInEdit.value = tariff;
-}
+};
 
 const onTariffUpdate = async (updated: Tariff) => {
   if (updated.id !== '') {
@@ -111,15 +139,14 @@ const onTariffUpdate = async (updated: Tariff) => {
     });
 
     if (result) refreshTariff(result);
-  }
-  else {
+  } else {
     const result = await errorToast.safeExecute(async () => {
       return await tariffPost(updated);
     });
 
     if (result) tariffs.value.push(result);
   }
-}
+};
 
 const apiDeleteTariff = async (tariffId: string) => {
   const result = await errorToast.safeExecute(async () => {
@@ -145,11 +172,11 @@ const refreshTariff = (updatedTariff: Tariff) => {
       severity: 'error',
       summary: 'Error',
       detail: 'Updated tariff was not found in the data table',
-    })
+    });
     return;
   }
   tariffs.value.splice(replaceTariffIdx, 1, updatedTariff);
-}
+};
 
 const refreshAllTariffs = async () => {
   const newTariffs = await errorToast.safeExecute(async () => {

@@ -1,6 +1,12 @@
 <template>
-  <Dialog v-model:visible="visible" modal :header="serverInEdit.id == '' ? 'Create New Server' : 'Edit Server => ' + serverInEdit.display_name
-    " class="w-[60vw] h-[80vh]">
+  <Dialog
+    v-model:visible="visible"
+    modal
+    :header="
+      serverInEdit.id == '' ? 'Create New Server' : 'Edit Server => ' + serverInEdit.display_name
+    "
+    class="w-[60vw] h-[80vh]"
+  >
     <Fluid class="flex flex-col gap-4">
       <div class="flex flex-col gap-4">
         <span class="text-xl p-2 border-b border-neutral-600">Main Settings</span>
@@ -14,13 +20,21 @@
         </FloatLabel>
         <div class="flex gap-4">
           <FloatLabel class="float-label-spacer" variant="in">
-            <DatePicker v-model="serverInEdit.starting_date" inputId="start-date-input" hourFormat="24"
-              dateFormat="dd.mm.yy" />
+            <DatePicker
+              v-model="serverInEdit.starting_date"
+              inputId="start-date-input"
+              hourFormat="24"
+              dateFormat="dd.mm.yy"
+            />
             <label for="start-date-input">Starting Date</label>
           </FloatLabel>
           <FloatLabel class="float-label-spacer" variant="in">
-            <DatePicker v-model="serverInEdit.closing_date" inputId="close-date-input" hourFormat="24"
-              dateFormat="dd.mm.yy" />
+            <DatePicker
+              v-model="serverInEdit.closing_date"
+              inputId="close-date-input"
+              hourFormat="24"
+              dateFormat="dd.mm.yy"
+            />
             <label for="close-date-input">Closing Date</label>
           </FloatLabel>
         </div>
@@ -29,8 +43,13 @@
         <span class="text-xl p-2 border-b border-neutral-600">Panel Settings</span>
         <div class="flex gap-4">
           <FloatLabel class="float-label-spacer" variant="in">
-            <InputNumber inputId="port-input" v-model="serverInEdit.panel_port" :useGrouping="false" :min="0"
-              :max="65535" />
+            <InputNumber
+              inputId="port-input"
+              v-model="serverInEdit.panel_port"
+              :useGrouping="false"
+              :min="0"
+              :max="65535"
+            />
             <label for="port-input">Port</label>
           </FloatLabel>
           <FloatLabel class="float-label-spacer" variant="in">

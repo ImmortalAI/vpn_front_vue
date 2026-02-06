@@ -1,6 +1,10 @@
 <template>
-  <Dialog v-model:visible="visible" modal :header="tariffInEdit.id == '' ? 'Create New Tariff' : 'Edit Tariff => ' + tariffInEdit.name
-    " class="w-[60vw] h-[80vh]">
+  <Dialog
+    v-model:visible="visible"
+    modal
+    :header="tariffInEdit.id == '' ? 'Create New Tariff' : 'Edit Tariff => ' + tariffInEdit.name"
+    class="w-[60vw] h-[80vh]"
+  >
     <Fluid class="flex flex-col gap-4">
       <div class="flex flex-col gap-4">
         <span class="text-xl p-2 border-b border-neutral-600">Main Settings</span>
@@ -17,24 +21,43 @@
         <span class="text-xl p-2 border-b border-neutral-600">Parameters</span>
         <div class="flex gap-4">
           <FloatLabel class="float-label-spacer" variant="in">
-            <InputNumber inputId="duration-input" v-model="tariffInEdit.duration" :useGrouping="false" :min="0"
-              :max="65535" />
+            <InputNumber
+              inputId="duration-input"
+              v-model="tariffInEdit.duration"
+              :useGrouping="false"
+              :min="0"
+              :max="65535"
+            />
             <label for="duration-input">Duration in days</label>
           </FloatLabel>
           <FloatLabel class="float-label-spacer" variant="in">
-            <InputNumber inputId="traffic-input" v-model="tariffInEdit.traffic" :useGrouping="false" :min="0"
-              suffix=" GiB" />
+            <InputNumber
+              inputId="traffic-input"
+              v-model="tariffInEdit.traffic"
+              :useGrouping="false"
+              :min="0"
+              suffix=" GiB"
+            />
             <label for="traffic-input">Traffic in GiB</label>
           </FloatLabel>
         </div>
         <div class="flex gap-4">
           <FloatLabel class="float-label-spacer" variant="in">
-            <InputNumber inputId="price-input" v-model="tariffInEdit.price" mode="currency" currency="RUB" />
+            <InputNumber
+              inputId="price-input"
+              v-model="tariffInEdit.price"
+              mode="currency"
+              currency="RUB"
+            />
             <label for="price-input">Price in RUB</label>
           </FloatLabel>
           <FloatLabel class="float-label-spacer" variant="in">
-            <InputNumber inputId="price-reset-input" v-model="tariffInEdit.price_of_traffic_reset" mode="currency"
-              currency="RUB" />
+            <InputNumber
+              inputId="price-reset-input"
+              v-model="tariffInEdit.price_of_traffic_reset"
+              mode="currency"
+              currency="RUB"
+            />
             <label for="price-reset-input">Reset Price in RUB</label>
           </FloatLabel>
         </div>
@@ -47,7 +70,11 @@
             <label for="with-access-input">With access</label>
           </div>
           <div class="flex items-center gap-2">
-            <Checkbox inputId="with-un-inbounds-input" v-model="tariffInEdit.with_unavailable_inbounds" binary />
+            <Checkbox
+              inputId="with-un-inbounds-input"
+              v-model="tariffInEdit.with_unavailable_inbounds"
+              binary
+            />
             <label for="with-un-inbounds-input">With unavailable inbounds</label>
           </div>
           <div class="flex items-center gap-2">
@@ -88,8 +115,7 @@ watch(
   () => {
     if (!props.tariff) {
       tariffInEdit.value = getEmptyTariff();
-    }
-    else {
+    } else {
       tariffInEdit.value = { ...props.tariff };
     }
   },

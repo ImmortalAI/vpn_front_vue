@@ -2,8 +2,13 @@
   <Card>
     <template #title>Servers</template>
     <template #content>
-      <DataTable :value="servers" dataKey="id" editMode="cell" :loading="loadingTable"
-        @cell-edit-complete="console.log">
+      <DataTable
+        :value="servers"
+        dataKey="id"
+        editMode="cell"
+        :loading="loadingTable"
+        @cell-edit-complete="console.log"
+      >
         <template #loading>
           <div class="flex gap-2">
             <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -33,14 +38,22 @@
         </Column>
         <Column>
           <template #body="slotProps">
-            <Button icon="pi pi-pencil" size="small" severity="secondary"
-              @click="editServer(slotProps.data as Server)" />
+            <Button
+              icon="pi pi-pencil"
+              size="small"
+              severity="secondary"
+              @click="editServer(slotProps.data as Server)"
+            />
           </template>
         </Column>
       </DataTable>
     </template>
   </Card>
-  <ServerEditDialog v-model:visible="dialogEditVisible" :server="serverInEdit" @save-server="updateServer" />
+  <ServerEditDialog
+    v-model:visible="dialogEditVisible"
+    :server="serverInEdit"
+    @save-server="updateServer"
+  />
 </template>
 
 <script setup lang="ts">
@@ -120,7 +133,8 @@ const createServer = async () => {
       starting_date: new Date(),
       closing_date: new Date(),
       secured: true,
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla eget ipsum consequat fringilla. Donec id elit non mi porta gravida at eget metus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.',
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla eget ipsum consequat fringilla. Donec id elit non mi porta gravida at eget metus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.',
       panel_login: 'ABOBA',
       panel_password: 'aboba',
       panel_port: 25565,
@@ -147,7 +161,8 @@ onMounted(async () => {
       starting_date: new Date(),
       closing_date: new Date(),
       secured: true,
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla eget ipsum consequat fringilla. Donec id elit non mi porta gravida at eget metus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.',
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla eget ipsum consequat fringilla. Donec id elit non mi porta gravida at eget metus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.',
       panel_login: 'ABOBA',
       panel_password: 'aboba',
       panel_port: 25565,
