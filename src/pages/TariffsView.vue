@@ -1,17 +1,10 @@
 <template>
   <div>
     <Card>
-      <template #header>
-        <h2>Tariffs</h2>
-      </template>
+      <template #title>Tariffs </template>
       <template #content>
-        <DataTable
-          editMode="cell"
-          :value="tariffs"
-          dataKey="id"
-          @cellEditComplete="onUpdateTariff"
-          :loading="dataTableLoading"
-        >
+        <DataTable editMode="cell" :value="tariffs" dataKey="id" @cellEditComplete="onUpdateFieldTariff"
+          :loading="dataTableLoading">
           <template #loading>
             <div class="flex gap-2">
               <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -20,11 +13,16 @@
           </template>
           <template #header>
             <div class="flex w-full justify-end">
-              <InputText placeholder="New tariff name" class="mr-2" v-model="newTariffName" />
-              <Button label="Add Tariff" icon="pi pi-plus" class="mr-2" @click="apiCreateTariff" />
+              <Button label="Add Tariff" icon="pi pi-plus" class="mr-2" @click="onCreateTariff" />
             </div>
           </template>
-          <Column field="id" header="Id" />
+          <Column field="id" header="Id">
+            <template #body="slotProps">
+              <span class="cursor-pointer" @click="copyGuid(slotProps.data.id as string)">{{ (slotProps.data.id as
+                string).slice(0, 8) +
+                ' *** ' + (slotProps.data.id as string).slice(-4) }}</span>
+            </template>
+          </Column>
           <Column field="name" header="Name">
             <template #editor="{ data }">
               <InputText v-model="(data as Tariff).name" />
@@ -42,95 +40,86 @@
           </Column>
           <Column field="traffic" header="Traffic (GiB)">
             <template #editor="{ data }">
-              <InputNumber
-                v-model="(data as Tariff).traffic"
-                :useGrouping="false"
-                :min="0"
-                suffix=" GiB"
-              />
+              <InputNumber v-model="(data as Tariff).traffic" :useGrouping="false" :min="0" suffix=" GiB" />
             </template>
           </Column>
           <Column field="price_of_traffic_reset" header="Price (Reset)">
             <template #editor="{ data }">
-              <InputNumber
-                v-model="(data as Tariff).price_of_traffic_reset"
-                mode="currency"
-                currency="RUB"
-              />
-            </template>
-          </Column>
-          <Column field="is_special" header="Is Special">
-            <template #body="slotProps">
-              <Checkbox
-                v-model="(slotProps.data as Tariff).is_special"
-                @change="
-                  onUpdateTariff({
-                    data: slotProps.data as Tariff,
-                    field: 'is_special',
-                    index: slotProps.index,
-                    newValue: (slotProps.data as Tariff).is_special,
-                  } as DataTableCellEditCompleteEvent<Tariff>)
-                "
-                binary
-              />
+              <InputNumber v-model="(data as Tariff).price_of_traffic_reset" mode="currency" currency="RUB" />
             </template>
           </Column>
           <Column header="Manage">
             <template #body="slotProps">
-              <Button
-                icon="pi pi-trash"
-                class="p-button-danger"
-                size="small"
-                @click="apiDeleteTariff((slotProps.data as Tariff).id)"
-              />
+              <div class="flex gap-4">
+                <Button icon="pi pi-pencil" class="p-button-success" size="small"
+                  @click="onEditTariff(slotProps.data as Tariff)" />
+                <Button icon="pi pi-trash" class="p-button-danger" size="small"
+                  @click="apiDeleteTariff((slotProps.data as Tariff).id)" />
+              </div>
             </template>
           </Column>
         </DataTable>
       </template>
     </Card>
+    <TariffEditDialog v-model:visible="editDialogVisible" :tariff="tariffInEdit" @saveTariff="onTariffUpdate" />
   </div>
 </template>
 
 <script setup lang="ts">
 // #region Imports
 import type { Tariff, TariffPatchRq } from '@/api/tariff/schema';
-import { tariffAll, tariffDelete, tariffGet, tariffPatch, tariffPost } from '@/api/tariff/service';
+import { tariffAll, tariffDelete, tariffPatch, tariffPost } from '@/api/tariff/service';
 import useErrorToast from '@/composables/useErrorToast';
 import type { DataTableCellEditCompleteEvent } from 'primevue/datatable';
 import { onMounted, ref } from 'vue';
 import { Icon } from '@iconify/vue';
+import useCopyGuid from '@/composables/useCopyGuid';
+import TariffEditDialog from '@/components/Dialogs/TariffEditDialog.vue';
+import { useToast } from 'primevue/usetoast';
 // #endregion
 
 const errorToast = useErrorToast();
+const toast = useToast();
 
-const onUpdateTariff = async (event: DataTableCellEditCompleteEvent<Tariff>) => {
+const editDialogVisible = ref(false);
+const tariffInEdit = ref<Tariff | null>(null);
+
+const onUpdateFieldTariff = async (event: DataTableCellEditCompleteEvent<Tariff>) => {
   const result = await errorToast.safeExecute(async () => {
     return await tariffPatch(event.data.id, {
       [event.field as keyof TariffPatchRq]: event.newValue,
     });
   });
 
-  if (result) await refreshTariff(event.data.id, event.index);
+  if (result) refreshTariff(result);
 };
 
-const newTariffName = ref('');
-const apiCreateTariff = async () => {
-  const result = await errorToast.safeExecute(async () => {
-    return await tariffPost({
-      name: newTariffName.value || 'New Tariff',
-      description: '',
-      duration: 1,
-      price: 0,
-      traffic: 1,
-      price_of_traffic_reset: 0,
-      is_special: false,
+const onCreateTariff = async () => {
+  editDialogVisible.value = true;
+  tariffInEdit.value = null;
+};
+
+const onEditTariff = async (tariff: Tariff) => {
+  editDialogVisible.value = true;
+  tariffInEdit.value = tariff;
+}
+
+const onTariffUpdate = async (updated: Tariff) => {
+  if (updated.id !== '') {
+    const result = await errorToast.safeExecute(async () => {
+      return await tariffPatch(updated.id, updated);
     });
-  });
 
-  if (result) {
-    tariffs.value.push(result);
+    if (result) refreshTariff(result);
   }
-};
+  else {
+    const result = await errorToast.safeExecute(async () => {
+      return await tariffPost(updated);
+    });
+
+    if (result) tariffs.value.push(result);
+  }
+}
 
 const apiDeleteTariff = async (tariffId: string) => {
   const result = await errorToast.safeExecute(async () => {
@@ -140,14 +129,27 @@ const apiDeleteTariff = async (tariffId: string) => {
   if (result) await refreshAllTariffs();
 };
 
-const refreshTariff = async (tariffId: string, replaceTariffIdx: number) => {
+/* const refreshTariff = async (tariffId: string, replaceTariffIdx: number) => {
   const newTariff = await errorToast.safeExecute(async () => {
     return await tariffGet(tariffId);
   });
   if (newTariff) {
     tariffs.value.splice(replaceTariffIdx, 1, newTariff);
   }
-};
+}; */
+
+const refreshTariff = (updatedTariff: Tariff) => {
+  const replaceTariffIdx = tariffs.value.findIndex((tariff) => tariff.id === updatedTariff.id);
+  if (replaceTariffIdx === -1) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Updated tariff was not found in the data table',
+    })
+    return;
+  }
+  tariffs.value.splice(replaceTariffIdx, 1, updatedTariff);
+}
 
 const refreshAllTariffs = async () => {
   const newTariffs = await errorToast.safeExecute(async () => {
@@ -172,4 +174,6 @@ onMounted(async () => {
 
   dataTableLoading.value = false;
 });
+
+const { copyGuid } = useCopyGuid();
 </script>

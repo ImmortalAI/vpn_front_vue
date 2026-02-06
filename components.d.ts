@@ -11,6 +11,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AppFooter: typeof import('./src/components/AppFooter.vue')['default']
+    AppHeader: typeof import('./src/components/AppHeader.vue')['default']
     Button: typeof import('primevue/button')['default']
     Card: typeof import('primevue/card')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
@@ -22,7 +24,6 @@ declare module 'vue' {
     FloatLabel: typeof import('primevue/floatlabel')['default']
     Fluid: typeof import('primevue/fluid')['default']
     Form: typeof import('@primevue/forms/form')['default']
-    HeaderComponent: typeof import('./src/components/HeaderComponent.vue')['default']
     IftaLabel: typeof import('primevue/iftalabel')['default']
     InputGroup: typeof import('primevue/inputgroup')['default']
     InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
@@ -33,8 +34,11 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Select: typeof import('primevue/select')['default']
+    ServerCreateDialog: typeof import('./src/components/Dialogs/ServerCreateDialog.vue')['default']
     ServerEditDialog: typeof import('./src/components/Dialogs/ServerEditDialog.vue')['default']
     Skeleton: typeof import('primevue/skeleton')['default']
+    TariffEditDialog: typeof import('./src/components/Dialogs/TariffEditDialog.vue')['default']
+    Textarea: typeof import('primevue/textarea')['default']
     Toast: typeof import('primevue/toast')['default']
   }
 }

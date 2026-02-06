@@ -1,11 +1,14 @@
 <template>
-  <div class="flex flex-col gap-4 h-screen w-screen">
-    <HeaderComponent />
-    <div class="w-full h-full scroll-auto">
+  <div class="flex flex-col min-h-screen">
+    <AppHeader />
+    <div class="grow pt-28">
       <RouterView />
     </div>
+    <AppFooter />
     <Toast position="bottom-right" />
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+
+</script>

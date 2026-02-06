@@ -15,7 +15,7 @@ export { MessageRsSchema as AuthTgCodeRsSchema, type MessageRs as AuthTgCodeRs }
 // request post /auth/login
 export const AuthLoginRqSchema = z.object({
   tg_id: z.coerce.number(),
-  tg_code: z.string(),
+  tg_code: z.string().regex(/^\d+$/),
 });
 
 export type AuthLoginRq = z.infer<typeof AuthLoginRqSchema>;

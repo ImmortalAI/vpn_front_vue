@@ -19,7 +19,6 @@ export const UserSettingsSchema = z.object({
   auto_pay: z.boolean(),
   is_active: z.boolean(),
   get_traffic_notifications: z.boolean(),
-  language_code: z.string(),
 });
 
 export const UserSchema = z.object({
@@ -32,7 +31,7 @@ export const UserSchema = z.object({
   created_date: z.coerce.date(),
   rights: UserRightsSchema,
   settings: UserSettingsSchema,
-  tariff: TariffSchema.nullable(),
+  tariff: TariffSchema,
 });
 
 export type UserRights = z.infer<typeof UserRightsSchema>;

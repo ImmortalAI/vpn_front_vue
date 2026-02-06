@@ -16,6 +16,19 @@ export const TariffSchema = z.object({
   is_special: z.boolean(),
 });
 
+export const getEmptyTariff = (): Tariff => ({
+  id: '',
+  name: '',
+  description: '',
+  duration: 0,
+  price: 0,
+  price_of_traffic_reset: 0,
+  traffic: 0,
+  with_access: false,
+  with_unavailable_inbounds: false,
+  is_special: false,
+});
+
 export type Tariff = z.infer<typeof TariffSchema>;
 
 // response get /tariffs
@@ -40,7 +53,7 @@ export const TariffPatchRqSchema = TariffSchema.omit({ id: true }).partial();
 export type TariffPatchRq = z.infer<typeof TariffPatchRqSchema>;
 
 // response patch /tariffs/{tariff_id}
-export { MessageRsSchema as TariffPatchRsSchema, type MessageRs as TariffPatchRs };
+export { TariffSchema as TariffPatchRsSchema, type Tariff as TariffPatchRs };
 
 // response delete /tariffs/{tariff_id}
 export { MessageRsSchema as TariffDeleteRsSchema, type MessageRs as TariffDeleteRs };

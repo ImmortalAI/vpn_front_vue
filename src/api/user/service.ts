@@ -12,6 +12,7 @@ import {
   type UserPatchRq,
   type UserPatchRs,
   type UserSelfGetRs,
+  type UserSettings,
 } from '@/api/user/schema';
 import { UuidSchema, type Uuid } from '@/api/base/schema';
 // #endregion
@@ -28,6 +29,12 @@ export async function userGet(data?: UserGetRq): Promise<UserGetRs> {
   const response = await apiClient.get<UserGetRs>('/users', {
     params: data ?? {},
   });
+  response.data.map(
+    (user) =>
+      (user.settings = Object.fromEntries(
+        Object.entries(user.settings).filter((v) => typeof v[1] === 'boolean'),
+      ) as UserSettings),
+  );
   return response.data;
 }
 
