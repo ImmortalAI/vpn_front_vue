@@ -1,36 +1,41 @@
 <template>
-  <InputText v-model="ip" :class="props.class" placeholder="127.0.0.1" :invalid="!isValidIp" />
+  <FloatLabel variant="in" class="float-label-spacer">
+    <InputText :model-value="ip" @update:model-value="updateInput" :class="props.class" placeholder="127.0.0.1"
+      :invalid="!isValidIp" :id="id" />
+    <label :for="id">{{ label }}</label>
+  </FloatLabel>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, useId } from 'vue';
 import * as z from 'zod';
 
 const props = defineProps<{
-  modelValue: string | null;
   class?: string;
 }>();
 
-const emits = defineEmits<{
-  (e: 'update:modelValue', value: string): void;
-}>();
+const id = useId();
 
-const ip = ref(props.modelValue || '');
+const ip = defineModel<string>('ip', { required: true });
+const label = defineModel<string>('label', { default: '' });
+
 const isValidIp = computed(() => z.ipv4().safeParse(ip.value).success);
 
-watch(
-  () => props.modelValue,
-  () => {
-    if (z.ipv4().safeParse(props.modelValue).success) {
-      ip.value = props.modelValue || '';
-    }
-  },
-);
+const ipv4ProgressRegex = /^$|^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])((\.((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9]))?){0,3})$/;
 
-watch(ip, () => {
-  if (ip.value.match(/^(\d{1,3}\.){0,2}\d{3}$/g) != null) {
-    ip.value += '.';
+const updateInput = (newValue?: string) => {
+  if (!newValue) return;
+
+  const oldValue = ip.value;
+
+  if (newValue.match(ipv4ProgressRegex) == null) {
+    newValue = oldValue;
   }
-  emits('update:modelValue', ip.value);
-});
+  else if (newValue.match(/^(\d{1,3}\.){0,2}\d{3}$/g) != null && !oldValue.endsWith('.')) {
+    newValue += '.';
+  }
+
+  ip.value = '';
+  nextTick(() => ip.value = newValue);
+};
 </script>

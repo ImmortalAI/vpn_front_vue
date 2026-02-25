@@ -2,13 +2,10 @@
   <Card>
     <template #title>Servers</template>
     <template #content>
-      <DataTable
-        :value="servers"
-        dataKey="id"
-        editMode="cell"
-        :loading="loadingTable"
-        @cell-edit-complete="console.log"
-      >
+      <DataTable :value="servers.pages[currentPage] ?? []" dataKey="id" editMode="cell" :loading="loadingTable"
+        @cell-edit-complete="(e) => console.log(e)" paginator lazy v-model:rows="rowsPerPageNumber"
+        :rows-per-page-options="[5, 10, 20]" :first="firstItemOnPage" :total-records="servers.count"
+        paginator-position="both" @page="changePage">
         <template #loading>
           <div class="flex gap-2">
             <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -17,13 +14,21 @@
         </template>
         <template #header>
           <div class="flex w-full justify-end">
-            <Button label="Add Server" icon="pi pi-plus" class="mr-2" @click="createServer" />
+            <Button label="Add Server" icon="pi pi-plus" class="mr-2" @click="onCreateServer" />
           </div>
         </template>
-        <Column field="id" header="Id" />
+        <Column field="id" header="Id">
+          <template #body="slotProps">
+            <span class="cursor-pointer" @click="copyGuid(slotProps.data.id as string)">{{
+              (slotProps.data.id as string).slice(0, 8) +
+              ' *** ' +
+              (slotProps.data.id as string).slice(-4)
+              }}</span>
+          </template>
+        </Column>
         <Column field="ip" header="IP Address">
           <template #editor="{ data, field }">
-            <IpInput v-model="data[field]" />
+            <IpInput v-model:ip="data[field]" />
           </template>
         </Column>
         <Column field="country_code" header="Country">
@@ -36,143 +41,112 @@
             <InputText v-model="data[field]" />
           </template>
         </Column>
-        <Column>
+        <Column header="Manage">
           <template #body="slotProps">
-            <Button
-              icon="pi pi-pencil"
-              size="small"
-              severity="secondary"
-              @click="editServer(slotProps.data as Server)"
-            />
+            <Button icon="pi pi-pencil" size="small" severity="secondary"
+              @click="onEditServer(slotProps.data as Server)" />
           </template>
         </Column>
       </DataTable>
     </template>
   </Card>
-  <ServerEditDialog
-    v-model:visible="dialogEditVisible"
-    :server="serverInEdit"
-    @save-server="updateServer"
-  />
+  <ServerEditDialog v-model:visible="editDialogVisible" :server="serverInEdit" @save-server="onServerUpdate" />
 </template>
 
 <script setup lang="ts">
 // #region Imports
 
-import type { Server, ServerPatchRq } from '@/api/server/schema';
-import { serverGet, serverIdPatch, serverPost } from '@/api/server/service';
+import type { Server } from '@/api/server/schema';
 import useErrorToast from '@/composables/useErrorToast';
 import {
-  type DataTableCellEditCompleteEvent,
-  type DataTableEditingRows,
-  type DataTableExpandedRows,
-  type DataTableRowEditInitEvent,
+  type DataTablePageEvent,
 } from 'primevue/datatable';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
-import formatRuDateTime from '@/utils/formatRuDateTime';
 import IpInput from '@/components/IpInput.vue';
 import ServerEditDialog from '@/components/Dialogs/ServerEditDialog.vue';
+import useCopyGuid from '@/composables/useCopyGuid';
+import { useServersStore } from '@/stores/servers';
 
 // #endregion
 
 // #region Composables
 
 const errorToast = useErrorToast();
+const { copyGuid } = useCopyGuid();
+const servers = useServersStore();
 
 // #endregion
 
-// #region Edit Server Data
+const editDialogVisible = ref(false);
+const serverInEdit = ref<Server | null>(null);
 
-const dialogEditVisible = ref(false);
-const serverInEdit = ref<Server>({
-  id: '',
-  ip: '',
-  country_code: '',
-  starting_date: new Date(),
-  closing_date: new Date(),
-  secured: false,
-  description: '',
-  display_name: '',
-  panel_port: 0,
-  panel_login: '',
-  panel_password: '',
-  panel_web_path: '',
-});
+const onCreateServer = async () => {
+  serverInEdit.value = null;
+  editDialogVisible.value = true;
+};
 
-const editServer = (server: Server) => {
+const onEditServer = async (server: Server) => {
   serverInEdit.value = server;
-  dialogEditVisible.value = true;
+  editDialogVisible.value = true;
 };
 
-// #endregion
-
-const updateServer = async (newData: Server) => {
-  //const result = await errorToast.safeExecute(async () => {
-  //   return await serverIdPatch(event.data.id, {
-  //     [event.field as keyof ServerPatchRq]: event.newValue,
-  //   });
-  // });
-
-  if (true) {
-    const index = servers.value.findIndex((server) => server.id === newData.id);
-    servers.value[index] = newData;
-  }
-};
-
-const createServer = async () => {
-  const result = await errorToast.safeExecute(async () => {
-    return 1;
-  });
-
-  if (result) {
-    servers.value.push({
-      id: `aboba${Math.round(Math.random() * 1000)}`,
-      ip: '127.0.0.1',
-      country_code: 'RU',
-      starting_date: new Date(),
-      closing_date: new Date(),
-      secured: true,
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla eget ipsum consequat fringilla. Donec id elit non mi porta gravida at eget metus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.',
-      panel_login: 'ABOBA',
-      panel_password: 'aboba',
-      panel_port: 25565,
-      panel_web_path: '/aboba',
-      display_name: `TEST SERVER ${Math.round(Math.random() * 1000)}`,
+const onServerUpdate = async (updated: Server) => {
+  if (updated.id !== '') {
+    await errorToast.safeExecute(async () => {
+      await servers.update(currentPage.value, updated)
+    });
+  } else {
+    await errorToast.safeExecute(async () => {
+      await servers.create(updated)
     });
   }
 };
 
-const servers = ref<Server[]>([]);
+/* const refreshServer = (updatedServer: Server) => {
+  const replaceTariffIdx = servers.value.findIndex((srv) => srv.id === updatedServer.id);
+  if (replaceTariffIdx === -1) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Updated server was not found in the data table',
+    });
+    return;
+  }
+  servers.value.splice(replaceTariffIdx, 1, updatedServer);
+}; */
+
 const loadingTable = ref<boolean>(true);
+
 onMounted(async () => {
-  // await errorToast.safeExecute(async () => {
-  //   await serverGet().then((response) => {
-  //     servers.value = response;
-  //   });
-  // });
-
-  servers.value = [
-    {
-      id: 'aaa',
-      ip: '127.0.0.1',
-      country_code: 'RU',
-      starting_date: new Date(),
-      closing_date: new Date(),
-      secured: true,
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla eget ipsum consequat fringilla. Donec id elit non mi porta gravida at eget metus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.',
-      panel_login: 'ABOBA',
-      panel_password: 'aboba',
-      panel_port: 25565,
-      panel_web_path: '/aboba',
-      display_name: 'TEST SERVER',
-    },
-  ];
-
-  await new Promise((resolve) => setTimeout(resolve, 500)); // Artificial delay for better UX
+  await servers.init();
 
   loadingTable.value = false;
 });
+
+const currentPage = ref(0);
+
+const firstItemOnPage = computed(() => currentPage.value * servers.pageSize);
+
+const rowsPerPageNumber = ref(5);
+
+watch(rowsPerPageNumber, async (newVal) => {
+  loadingTable.value = true;
+
+  await servers.init(newVal);
+  currentPage.value = 0;
+
+  loadingTable.value = false;
+})
+
+const changePage = async (event: DataTablePageEvent) => {
+  if (event.rows !== servers.pageSize) return;
+
+  loadingTable.value = true;
+
+  await servers.loadPage(event.page);
+  currentPage.value = event.page;
+
+  loadingTable.value = false;
+}
 </script>

@@ -1,6 +1,6 @@
 // #region imports
 import * as z from 'zod';
-import { MessageRsSchema, type MessageRs } from '@/api/base/schema';
+import { MessageRsSchema, PaginationSchema, type MessageRs } from '@/api/base/schema';
 // #endregion
 
 export const InboundSchema = z.object({
@@ -32,60 +32,49 @@ export const ServerSchema = z.object({
 
 export type Server = z.infer<typeof ServerSchema>;
 
-// request get /servers
-export const ServerGetRqSchema = z.object({
-  offset: z.number().int().min(0).optional(),
-  limit: z.number().int().min(1).optional(),
+export const getEmptyServer = (): Server => ({
+  id: '',
+  ip: '',
+  secured: false,
+  description: '',
+  country_code: '',
+  display_name: '',
+  starting_date: new Date(),
+  closing_date: new Date(),
+  panel_port: 443,
+  panel_web_path: '',
+  panel_login: '',
+  panel_password: '',
 });
 
-export type ServerGetRq = z.infer<typeof ServerGetRqSchema>;
-
-// response get /servers
-export const ServerGetRsSchema = z.array(ServerSchema);
-
-export type ServerGetRs = z.infer<typeof ServerGetRsSchema>;
-
 // request post /servers
-export const ServerPostRqSchema = ServerSchema.omit({
+export const NewServerSchema = ServerSchema.omit({
   id: true,
 });
 
-export type ServerPostRq = z.infer<typeof ServerPostRqSchema>;
-
-// response post /servers
-export { ServerSchema as ServerPostRsSchema, type Server as ServerPostRs };
-
-// response get /servers/count
-export const ServerCountRsSchema = z.number().int().min(0);
-
-export type ServerCountRs = z.infer<typeof ServerCountRsSchema>;
-
-// request get /servers/{server_id}
-export const ServerGetByIdRqSchema = z.object({
-  server_id: z.uuid(),
-});
-
-export type ServerGetByIdRq = z.infer<typeof ServerGetByIdRqSchema>;
-
-// response get /servers/{server_id}
-export { ServerSchema as ServerGetByIdRsSchema, type Server as ServerGetByIdRs };
+export type NewServer = z.infer<typeof NewServerSchema>;
 
 // request patch /servers/{server_id}
-export const ServerPatchRqSchema = ServerSchema.omit({ id: true }).partial();
+export const UpdateServerSchema = ServerSchema.omit({ id: true }).partial();
 
-export type ServerPatchRq = z.infer<typeof ServerPatchRqSchema>;
+export type UpdateServer = z.infer<typeof UpdateServerSchema>;
 
 // response patch /servers/{server_id}
-export { MessageRsSchema as ServerPatchRsSchema, type MessageRs as ServerPatchRs };
+export { ServerSchema as ServerPatchRsSchema, type Server as ServerPatchRs };
 
-// request get /servers/inbounds
-export const InboundsGetRqSchema = z.object({
+export const InboundPaginationSchema = PaginationSchema.extend({
   server_id: z.uuid().optional(),
-  offset: z.number().int().min(0).optional(),
-  limit: z.number().int().min(1).optional(),
 });
 
-export type InboundsGetRq = z.infer<typeof InboundsGetRqSchema>;
+export type InboundPagination = z.infer<typeof InboundPaginationSchema>;
+
+export const NewInboundSchema = InboundSchema.omit({ id: true });
+
+export type NewInbound = z.infer<typeof NewInboundSchema>;
+
+export const UpdateInboundSchema = InboundSchema.omit({ id: true }).partial();
+
+export type UpdateInbound = z.infer<typeof UpdateInboundSchema>;
 
 // response get /servers/inbounds
 export const InboundsGetRsSchema = z.array(InboundSchema);
