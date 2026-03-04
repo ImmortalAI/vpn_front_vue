@@ -55,9 +55,9 @@ export const NewServerSchema = ServerSchema.omit({
 export type NewServer = z.infer<typeof NewServerSchema>;
 
 // request patch /servers/{server_id}
-export const UpdateServerSchema = ServerSchema.omit({ id: true }).partial();
+export const PartialServerSchema = ServerSchema.omit({ id: true }).partial();
 
-export type UpdateServer = z.infer<typeof UpdateServerSchema>;
+export type PartialServer = z.infer<typeof PartialServerSchema>;
 
 // response patch /servers/{server_id}
 export { ServerSchema as ServerPatchRsSchema, type Server as ServerPatchRs };

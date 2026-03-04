@@ -5,14 +5,14 @@ import {
   NewInboundSchema,
   NewServerSchema,
   UpdateInboundSchema,
-  UpdateServerSchema,
+  PartialServerSchema,
   type Inbound,
   type InboundPagination,
   type NewInbound,
   type NewServer,
   type Server,
   type UpdateInbound,
-  type UpdateServer,
+  type PartialServer,
 } from '@/api/server/schema';
 import { PaginationSchema, UuidSchema, type Pagination, type Uuid } from '@/api/base/schema';
 import z from 'zod';
@@ -91,13 +91,13 @@ export async function serverGetById(server_id: Uuid): Promise<Server> {
  * Patches an existing server with only the fields that have changed.
  *
  * @param {Uuid} serverID - The UUID of the server to patch.
- * @param {UpdateServer} newData - The new server data.
+ * @param {PartialServer} newData - The new server data.
  * @returns {Promise<Server>} The response message with the updated server data.
  * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
  */
-export async function serverIdPatch(serverID: Uuid, newData: UpdateServer): Promise<Server> {
+export async function serverIdPatch(serverID: Uuid, newData: PartialServer): Promise<Server> {
   UuidSchema.parse(serverID);
-  UpdateServerSchema.parse(newData);
+  PartialServerSchema.parse(newData);
   const response = await apiClient.patch<Server>(`/servers/${serverID}`, newData);
 
   return coerceServer(response.data);

@@ -1,10 +1,10 @@
-import DashboardView from '@/pages/DashboardView.vue';
+import DashboardPage from '@/pages/DashboardPage.vue';
 
 const routes = [
   {
     path: '/',
     name: 'main',
-    component: DashboardView,
+    component: DashboardPage,
     meta: {
       canRedirectHome: false,
     },
@@ -12,7 +12,7 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/pages/LoginView.vue'),
+    component: () => import('@/pages/LoginPage.vue'),
     meta: {
       canRedirectHome: false,
     },
@@ -20,7 +20,7 @@ const routes = [
   {
     path: '/users',
     name: 'users',
-    component: () => import('@/pages/UsersView.vue'),
+    component: () => import('@/pages/UsersPage.vue'),
     meta: {
       canRedirectHome: true,
     },
@@ -28,7 +28,15 @@ const routes = [
   {
     path: '/tariffs',
     name: 'tariffs',
-    component: () => import('@/pages/TariffsView.vue'),
+    component: () => import('@/pages/TariffsPage.vue'),
+    meta: {
+      canRedirectHome: true,
+    },
+  },
+  {
+    path: '/balance/:userId',
+    name: 'balance',
+    component: () => import('@/pages/TransactionPage.vue'),
     meta: {
       canRedirectHome: true,
     },
@@ -36,7 +44,7 @@ const routes = [
   {
     path: '/servers',
     name: 'servers',
-    component: () => import('@/pages/ServersView.vue'),
+    component: () => import('@/pages/ServersPage.vue'),
     meta: {
       canRedirectHome: true,
     },
@@ -44,7 +52,7 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
-    component: () => import('@/pages/NotFoundView.vue'),
+    component: () => import('@/pages/NotFoundPage.vue'),
     meta: {
       canRedirectHome: true,
     },

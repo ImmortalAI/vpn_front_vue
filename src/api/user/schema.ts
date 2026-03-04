@@ -1,6 +1,5 @@
 // #region imports
 import * as z from 'zod';
-import { type MessageRs, MessageRsSchema } from '@/api/base/schema';
 import { TariffSchema } from '@/api/tariff/schema';
 // #endregion
 
@@ -38,27 +37,7 @@ export type UserRights = z.infer<typeof UserRightsSchema>;
 export type UserSettings = z.infer<typeof UserSettingsSchema>;
 export type User = z.infer<typeof UserSchema>;
 
-// request get /users
-export const UserGetRqSchema = z.object({
-  offset: z.number().int().optional(),
-  limit: z.number().int().optional(),
-});
-
-export type UserGetRq = z.infer<typeof UserGetRqSchema>;
-
-// response get /users
-export const UserGetRsSchema = z.array(UserSchema);
-
-export type UserGetRs = z.infer<typeof UserGetRsSchema>;
-
-// response get /users/count
-
-export const UserCountRsSchema = z.number().int();
-
-export type UserCountRs = z.infer<typeof UserCountRsSchema>;
-
-// request patch /users/{user_id}
-export const UserPatchRqSchema = z.object({
+export const UserPatchSchema = z.object({
   telegram_id: z.number().int().optional(),
   tariff_id: z.uuid().optional(),
   description: z.string().optional(),
@@ -66,20 +45,14 @@ export const UserPatchRqSchema = z.object({
   settings: UserSettingsSchema.optional(),
 });
 
-export type UserPatchRq = z.infer<typeof UserPatchRqSchema>;
+export type UserPatch = z.infer<typeof UserPatchSchema>;
 
-// response patch /users/{user_id}
-export { MessageRsSchema as UserPatchRsSchema, type MessageRs as UserPatchRs };
-
-// request /users/{user_id}
-export const UserGetByIdRqSchema = z.object({
-  user_id: z.uuid(),
-});
-
-export type UserGetByIdRq = z.infer<typeof UserGetByIdRqSchema>;
-
-// response get /users/{user_id}
-export { UserSchema as UserGetByIdRsSchema, type User as UserGetByIdRs };
-
-// response get /users/me
-export { UserSchema as UserSelfGetRsSchema, type User as UserSelfGetRs };
+export const convertUser = (user: User): UserPatch => {
+  return {
+    telegram_id: user.telegram_id,
+    tariff_id: user.tariff.id,
+    description: user.description,
+    rights: user.rights,
+    settings: user.settings,
+  };
+};

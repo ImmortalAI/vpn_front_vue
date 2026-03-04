@@ -119,7 +119,9 @@ const onServerUpdate = async (updated: Server) => {
 const loadingTable = ref<boolean>(true);
 
 onMounted(async () => {
-  await servers.init();
+  await errorToast.safeExecute(async () => {
+    await servers.init();
+  })
 
   loadingTable.value = false;
 });
@@ -133,7 +135,9 @@ const rowsPerPageNumber = ref(5);
 watch(rowsPerPageNumber, async (newVal) => {
   loadingTable.value = true;
 
-  await servers.init(newVal);
+  await errorToast.safeExecute(async () => {
+    await servers.init(newVal);
+  })
   currentPage.value = 0;
 
   loadingTable.value = false;
@@ -144,8 +148,10 @@ const changePage = async (event: DataTablePageEvent) => {
 
   loadingTable.value = true;
 
-  await servers.loadPage(event.page);
-  currentPage.value = event.page;
+  await errorToast.safeExecute(async () => {
+    await servers.loadPage(event.page);
+    currentPage.value = event.page;
+  })
 
   loadingTable.value = false;
 }

@@ -1,4 +1,4 @@
-import type { Server, UpdateServer } from '@/api/server/schema';
+import type { Server, PartialServer } from '@/api/server/schema';
 import { serverCount, serverGet, serverIdPatch, serverPost } from '@/api/server/service';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
@@ -136,7 +136,7 @@ export const useServersStore = defineStore('servers', () => {
 
     const old = currentPage[oldIndex] as Server;
 
-    const changes: UpdateServer = {};
+    const changes: PartialServer = {};
     (Object.keys(server) as (keyof Server)[]).forEach((val) => {
       if (val == 'id') return;
 

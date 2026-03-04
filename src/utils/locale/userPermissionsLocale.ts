@@ -1,10 +1,10 @@
 export default {
-  is_server_editor: 'Server editor',
-  is_transaction_editor: 'Transaction editor',
-  is_active_period_editor: 'Active period editor',
-  is_tariff_editor: 'Tariff editor',
-  is_member_rights_editor: 'Member rights editor',
-  is_admin_rights_editor: 'Admin rights editor',
-  is_control_panel_user: 'Control panel access',
+  is_servers_editor: 'Can edit servers',
+  is_transactions_editor: 'Can edit transactions',
+  is_users_editor: 'Can edit users data',
+  is_tariffs_editor: 'Can edit tariffs',
+  is_member_rights_editor: 'Can edit member rights',
+  is_admin_rights_editor: 'Can edit admin rights',
+  is_control_panel_user: 'Can use control panel',
   is_verified: 'Verified',
 } as Record<string, string>;

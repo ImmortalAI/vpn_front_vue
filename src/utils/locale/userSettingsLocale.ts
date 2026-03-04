@@ -1,5 +1,5 @@
 export default {
-  auto_pay: '自動更新',
-  is_active: '有効',
+  auto_pay: 'Activate auto pay',
+  is_active: 'Active account',
   get_traffic_notifications: 'Traffic notifications',
 } as Record<string, string>;
