@@ -38,7 +38,7 @@
           <Column field="tariff" header="Tariff">
             <template #body="slotProps">
               <Select :modelValue="(slotProps.data as User).tariff.id"
-                @update:modelValue="updateTariff((slotProps.data as User), $event)" :options="tariffs.shortList"
+                @update:modelValue="updateTariff((slotProps.data as User).id, $event)" :options="tariffs.shortList"
                 optionLabel="name" optionValue="id"></Select>
             </template>
           </Column>
@@ -140,8 +140,8 @@ const saveSettingsModal = async (updatedUserSettings: Record<string, boolean>) =
   userInEdit.value = null;
 };
 
-const updateTariff = async (userId: User, tariffId: Uuid) => {
-  await users.update(userInEdit.value!.id, {
+const updateTariff = async (userId: Uuid, tariffId: Uuid) => {
+  await users.update(userId, {
     tariff_id: tariffs.items.find((tariff) => tariff.id === tariffId)!.id
   })
 }
@@ -167,12 +167,12 @@ onMounted(async () => {
   await users.initialize();
 });
 
-watch(() => users.error, (newValue) => {
-  if (newValue) {
+watch(() => users.error, (err) => {
+  if (err) {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: newValue,
+      detail: err,
       life: 3000
     })
 
