@@ -46,13 +46,3 @@ export const UserPatchSchema = z.object({
 });
 
 export type UserPatch = z.infer<typeof UserPatchSchema>;
-
-export const convertUser = (user: User): UserPatch => {
-  return {
-    telegram_id: user.telegram_id,
-    tariff_id: user.tariff.id,
-    description: user.description,
-    rights: user.rights,
-    settings: user.settings,
-  };
-};

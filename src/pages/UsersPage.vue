@@ -3,10 +3,9 @@
     <Card>
       <template #title>Users</template>
       <template #content>
-        <DataTable :value="users.pages[currentPage] ?? []" dataKey="id" editMode="cell" :loading="loadingTable"
-          @cell-edit-complete="updateDataTable" paginator lazy v-model:rows="rowsPerPageNumber"
-          :rows-per-page-options="[5, 10, 20]" :first="firstItemOnPage" :total-records="users.count"
-          paginator-position="both" @page="changePage">
+        <DataTable :value="users.items" dataKey="id" editMode="cell" :loading="loadingTable"
+          @cell-edit-complete="cellEdit" paginator lazy v-model:rows="users.rows" :rows-per-page-options="[5, 10, 20]"
+          :first="users.first" :total-records="users.totalRecords" paginator-position="both">
           <template #loading>
             <div class="flex gap-2">
               <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -19,7 +18,7 @@
                 (slotProps.data.id as string).slice(0, 8) +
                 ' *** ' +
                 (slotProps.data.id as string).slice(-4)
-                }}</span>
+              }}</span>
             </template>
           </Column>
           <Column field="telegram_id" header="Telegram ID">
@@ -38,7 +37,7 @@
           </Column>
           <Column field="tariff" header="Tariff">
             <template #body="slotProps">
-              <Select :modelValue="users.tariffs[(slotProps.data as User).id]"
+              <Select :modelValue="(slotProps.data as User).tariff.id"
                 @update:modelValue="updateTariff((slotProps.data as User), $event)" :options="tariffs.shortList"
                 optionLabel="name" optionValue="id"></Select>
             </template>
@@ -73,13 +72,13 @@
 import { Icon } from '@iconify/vue';
 import {
   type User,
+  type UserPatch,
   type UserRights,
   type UserSettings,
 } from '@/api/user/schema';
-import useErrorToast from '@/composables/useErrorToast';
 import userPermissionsLocale from '@/utils/locale/userPermissionsLocale';
-import type { DataTableCellEditCompleteEvent, DataTablePageEvent } from 'primevue/datatable';
-import { computed, onMounted, ref, watch } from 'vue';
+import type { DataTableCellEditCompleteEvent } from 'primevue/datatable';
+import { onMounted, ref, watch } from 'vue';
 import userSettingsLocale from '@/utils/locale/userSettingsLocale';
 import useCopyGuid from '@/composables/useCopyGuid';
 import CheckboxDialog from '@/components/Dialogs/CheckboxDialog.vue';
@@ -87,13 +86,14 @@ import { useUsersStore } from '@/stores/users';
 import { useTariffsStore } from '@/stores/tariffs';
 import { useRouter } from 'vue-router';
 import type { Uuid } from '@/api/base/schema';
+import { useToast } from 'primevue/usetoast';
 
 // #endregion
 
-const errorToast = useErrorToast();
 const users = useUsersStore();
 const tariffs = useTariffsStore();
 const router = useRouter();
+const toast = useToast();
 
 const { copyGuid } = useCopyGuid();
 
@@ -113,11 +113,8 @@ const openRightsModal = (user: User) => {
  */
 const saveRightsModal = async (updatedUserRights: Record<string, boolean>) => {
   // Send the updated rights to the server
-  await errorToast.safeExecute(async () => {
-    await users.patch(currentPage.value, {
-      ...userInEdit.value!,
-      rights: updatedUserRights as UserRights
-    });
+  await users.update(userInEdit.value!.id, {
+    rights: updatedUserRights as UserRights
   });
 
   userInEdit.value = null;
@@ -136,74 +133,50 @@ const openSettingsModal = (user: User) => {
  * Closes the settings modal after saving.
  */
 const saveSettingsModal = async (updatedUserSettings: Record<string, boolean>) => {
-  await errorToast.safeExecute(async () => {
-    await users.patch(currentPage.value, {
-      ...userInEdit.value!,
-      settings: updatedUserSettings as UserSettings
-    });
+  await users.update(userInEdit.value!.id, {
+    settings: updatedUserSettings as UserSettings
   });
 
   userInEdit.value = null;
 };
 
 const updateTariff = async (userId: User, tariffId: Uuid) => {
-  await errorToast.safeExecute(async () => {
-    await users.patch(currentPage.value, {
-      ...userId,
-      tariff: tariffs.items.find((tariff) => tariff.id === tariffId)!
-    });
+  await users.update(userInEdit.value!.id, {
+    tariff_id: tariffs.items.find((tariff) => tariff.id === tariffId)!.id
   })
 }
 
-const updateDataTable = async (event: DataTableCellEditCompleteEvent<User>) => {
-  await errorToast.safeExecute(async () => {
-    await users.patch(currentPage.value, event.newData);
-  });
+const cellEdit = async (event: DataTableCellEditCompleteEvent<User>) => {
+  const patchObj = {} as UserPatch;
+
+  switch (event.field) {
+    case 'telegram_id':
+      patchObj.telegram_id = event.newValue;
+      break;
+
+    default:
+      return;
+  }
+
+  await users.update(event.data.id, patchObj);
 };
 
 const loadingTable = ref<boolean>(false);
 
 onMounted(async () => {
-  loadingTable.value = true;
-
-  await errorToast.safeExecute(async () => {
-    await Promise.all([
-      users.init(),
-      tariffs.init(),
-    ])
-  })
-
-  loadingTable.value = false;
+  await users.initialize();
 });
 
-const currentPage = ref(0);
+watch(() => users.error, (newValue) => {
+  if (newValue) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: newValue,
+      life: 3000
+    })
 
-const firstItemOnPage = computed(() => currentPage.value * users.pageSize);
-
-const rowsPerPageNumber = ref(5);
-
-watch(rowsPerPageNumber, async (newVal) => {
-  loadingTable.value = true;
-
-  await errorToast.safeExecute(async () => {
-    await users.init(newVal);
-  })
-  currentPage.value = 0;
-
-  loadingTable.value = false;
+    users.error = null;
+  }
 })
-
-const changePage = async (event: DataTablePageEvent) => {
-  if (event.rows !== users.pageSize) return;
-
-  loadingTable.value = true;
-
-  await errorToast.safeExecute(async () => {
-    await users.loadPage(event.page);
-    currentPage.value = event.page;
-  })
-
-  loadingTable.value = false;
-}
-
 </script>

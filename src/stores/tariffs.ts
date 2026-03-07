@@ -8,7 +8,7 @@ export const useTariffsStore = defineStore('tariffs', () => {
 
   const initialized = ref(false);
 
-  const init = async () => {
+  const initialize = async () => {
     if (initialized.value) return;
 
     items.value = await tariffAll();
@@ -17,5 +17,5 @@ export const useTariffsStore = defineStore('tariffs', () => {
 
   const shortList = computed(() => items.value.map((t) => ({ name: t.name, id: t.id })));
 
-  return { items, shortList, initialized, init };
+  return { items, shortList, initialized, initialize };
 });

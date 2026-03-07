@@ -1,156 +1,170 @@
 import type { Uuid } from '@/api/base/schema';
-import { convertUser, type User } from '@/api/user/schema';
-import { userCount, userGet, userGetById, userPatch } from '@/api/user/service';
+import type { User, UserPatch } from '@/api/user/schema';
+import { userCount, userGet, userPatch } from '@/api/user/service';
+import errorExtractor from '@/utils/errorExtractor';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, watch, type Ref } from 'vue';
+import { useTariffsStore } from './tariffs';
 
+/**
+ * Pinia store for managing user list.
+ * Provides CRUD operations with pagination support.
+ */
 export const useUsersStore = defineStore('users', () => {
   /**
-   * A record mapping page indices to arrays of users.
-   * Each key represents a zero-based page index, and the value is
-   * the array of {@link User} objects loaded for that page.
+   * List of users on the current page
+   * @type {Ref<User[]>}
    */
-  const pages = ref<Record<number, User[]>>({});
-
-  const tariffs = ref<Record<Uuid, Uuid>>({});
-
-  /** Total number of users available on the backend. */
-  const count = ref(0);
-
-  /** Number of users fetched per page. */
-  const pageSize = ref(5);
+  const items: Ref<User[]> = ref<User[]>([]);
 
   /**
-   * Set of page indices that are currently being fetched.
-   * Used to prevent duplicate concurrent requests for the same page
-   * and to cancel stale loads when {@link init} is called.
+   * Total number of records in the database
+   * @type {Ref<number>}
    */
-  const loadingPages = new Set<number>();
+  const totalRecords: Ref<number> = ref(0);
 
   /**
-   * Initializes (or re-initializes) the store by resetting all cached pages,
-   * fetching the total user count, and loading the first page.
-   *
-   * @param initialPageSize - Number of users per page. Defaults to `5`.
-   * @returns A promise that resolves once initialization is complete.
-   * @throws {AxiosError} If any of the underlying API calls
-   *   ({@link userCount}, {@link userGet}) fail.
+   * Loading state flag
+   * @type {Ref<boolean>}
    */
-  const init = async (initialPageSize: number = 5): Promise<void> => {
-    pageSize.value = initialPageSize;
-    pages.value = {};
-    loadingPages.clear();
-
-    const [userCountData, userPageData] = await Promise.all([
-      userCount(),
-      userGet({ limit: initialPageSize }),
-    ]);
-
-    count.value = userCountData;
-    pages.value[0] = userPageData;
-
-    userPageData.forEach((user) => {
-      tariffs.value[user.id] = user.tariff.id;
-    });
-  };
+  const loading: Ref<boolean> = ref(false);
 
   /**
-   * Loads a specific page of users into the store.
-   *
-   * If the page is already loaded or is currently being fetched, the call
-   * is a no-op. If {@link init} is called while a page is loading, the
-   * in-flight result is discarded to avoid writing stale data.
-   *
-   * @param indexPage - Zero-based page index to load.
-   * @returns A promise that resolves once the page has been loaded (or skipped).
-   * @throws {AxiosError} If the underlying {@link userGet} call fails.
-   * @throws {ZodError} If the underlying {@link userGet} call fails.
+   * Error message (null if no errors)
+   * @type {Ref<string | null>}
    */
-  const loadPage = async (indexPage: number): Promise<void> => {
-    if (pages.value[indexPage] || loadingPages.has(indexPage)) return;
+  const error: Ref<string | null> = ref<string | null>(null);
 
-    loadingPages.add(indexPage);
+  /**
+   * Index of the first item on current page (for pagination)
+   * @type {Ref<number>}
+   */
+  const first: Ref<number> = ref(0);
+
+  /**
+   * Number of rows per page
+   * @type {Ref<number>}
+   */
+  const rows: Ref<number> = ref(10);
+
+  /**
+   * Store initialization flag (prevents redundant loading)
+   * @type {Ref<boolean>}
+   */
+  const isInitialized: Ref<boolean> = ref(false);
+
+  /**
+   * Initializes the store: fetches total record count
+   * and loads the first page of data.
+   * This method is idempotent - subsequent calls are ignored.
+   *
+   * @async
+   * @returns {Promise<void>}
+   *
+   * @example
+   * ```ts
+   * // In a component
+   * onMounted(async () => {
+   *   await usersStore.initialize();
+   * });
+   * ```
+   */
+  const initialize = async (): Promise<void> => {
+    if (isInitialized.value) return;
+
+    loading.value = true;
 
     try {
-      const newPage = await userGet({
-        offset: indexPage * pageSize.value,
-        limit: pageSize.value,
-      });
+      const countItems = await userCount();
+      const page = await userGet({ offset: first.value, limit: rows.value });
 
-      // If init() called then we should stop loading this page
-      if (!loadingPages.has(indexPage)) return;
+      await useTariffsStore().initialize();
 
-      pages.value[indexPage] = newPage;
-
-      newPage.forEach((user) => {
-        tariffs.value[user.id] = user.tariff.id;
-      });
+      totalRecords.value = countItems;
+      items.value = page;
+      isInitialized.value = true;
+    } catch (e) {
+      const msg = errorExtractor(e);
+      error.value = msg;
+      console.error(msg);
     } finally {
-      loadingPages.delete(indexPage);
+      loading.value = false;
     }
-  };
-
-  const getSpecific = async (userId: Uuid): Promise<User> => {
-    let user: User | null = null;
-    for (const page of Object.values(pages.value)) {
-      const userInPage = page.find((u) => u.id === userId);
-      if (userInPage) {
-        user = userInPage;
-        break;
-      }
-    }
-
-    if (user) return user;
-
-    return await userGetById(userId);
   };
 
   /**
-   * Patches an existing user with only the fields that have changed and
-   * updates the corresponding entry in the store's page cache in-place.
+   * Fetches data for the current page.
+   * Uses current `first` and `rows` values for pagination.
    *
-   * Only fields whose values differ from the currently cached user are
-   * included in the PATCH request. If no fields have changed, the method
-   * returns immediately without making an API call.
+   * @async
+   * @param {boolean} [noLoading=false] - If true, does not toggle loading flag
+   *                                      (useful for background updates)
+   * @returns {Promise<void>}
    *
-   * @param pageNum - Zero-based page index where the user is located.
-   * @param user    - The {@link User} object containing updated field values.
-   *   Must include a valid `id` that matches an entry on the given page.
-   * @returns A promise that resolves once the user has been patched and the
-   *   local cache has been updated (or immediately if nothing changed).
-   * @throws {Error} If the specified page is not loaded in the store.
-   * @throws {Error} If a user with the given `id` is not found on the
-   *   specified page.
-   * @throws {AxiosError} If the underlying {@link userPatch} call fails.
-   * @throws {ZodError} If the underlying {@link userPatch} call fails.
+   * @example
+   * ```ts
+   * // Regular fetch with loading indicator
+   * await usersStore.fetchData();
+   *
+   * // Background update without loading indicator
+   * await usersStore.fetchData(true);
+   * ```
    */
-  const patch = async (pageNum: number, patch: User) => {
-    const currentPage = pages.value[pageNum];
-    if (!currentPage) {
-      throw new Error('Current page is not loaded, unable to update one of its users');
+  const fetchData = async (noLoading: boolean = false): Promise<void> => {
+    if (!noLoading) loading.value = true;
+    error.value = null;
+
+    try {
+      const page = await userGet({ offset: first.value, limit: rows.value });
+      items.value = page;
+    } catch (e) {
+      const msg = errorExtractor(e);
+      error.value = msg;
+      console.error(msg);
+    } finally {
+      if (!noLoading) loading.value = false;
     }
-
-    const oldUserIndex = currentPage.findIndex((u) => {
-      return u.id === patch.id;
-    });
-
-    if (oldUserIndex === -1) {
-      throw new Error('User to update was not found in the current page');
-    }
-
-    const updatedUser = await userPatch(patch.id, convertUser(patch));
-
-    currentPage.splice(oldUserIndex, 1, updatedUser);
   };
 
+  /**
+   * Updates an existing user by ID and refreshes the list.
+   * If an error occurs, error message is stored in `error` state.
+   *
+   * @async
+   * @param {Uuid} userId - Unique identifier of the user to update
+   * @param {UserPatch} patches - Object containing fields to update
+   * @returns {Promise<void>}
+   */
+  const update = async (userId: Uuid, patches: UserPatch): Promise<void> => {
+    loading.value = true;
+
+    try {
+      await userPatch(userId, patches);
+      await fetchData(true);
+    } catch (e) {
+      const msg = errorExtractor(e);
+      error.value = msg;
+      console.error(msg);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // Automatically fetch data when pagination page changes
+  watch([first, rows], async () => {
+    await fetchData();
+  });
+
   return {
-    pages,
-    tariffs,
-    count,
-    pageSize,
-    init,
-    patch,
-    getSpecific,
-    loadPage,
+    items,
+    totalRecords,
+    loading,
+    error,
+    first,
+    rows,
+
+    initialize,
+    fetchData,
+    update,
   };
 });
