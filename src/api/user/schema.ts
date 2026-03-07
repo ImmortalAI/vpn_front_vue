@@ -26,7 +26,7 @@ export const UserSchema = z.object({
   telegram_username: z.string(),
   telegram_language_code: z.string(),
   description: z.string(),
-  balance: z.number(),
+  balance: z.int(),
   created_date: z.coerce.date(),
   rights: UserRightsSchema,
   settings: UserSettingsSchema,

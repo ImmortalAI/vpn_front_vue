@@ -85,7 +85,7 @@ const chosenTransactionDescription = ref<string>('');
 const onAddNewTransaction = async () => {
   await transactions.create({
     user_id: transactions.user.id,
-    amount: chosenTransactionAmount.value * 100, /* in kopecks */
+    amount: Math.round(chosenTransactionAmount.value * 100), /* in kopecks */
     transaction_type: chosenTransactionType.value.value,
     date: new Date(),
     description: chosenTransactionDescription.value,

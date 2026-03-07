@@ -26,13 +26,25 @@
 </template>
 
 <script setup lang="ts">
+import { notificationPost } from '@/api/notifications/service';
+import useErrorToast from '@/composables/useErrorToast';
 import { ref } from 'vue';
+
+const errorToast = useErrorToast();
 
 const enText = ref('');
 const ruText = ref('');
 const notifyCheck = ref(false);
 
-const sendMessage = () => {
-
+const sendMessage = async () => {
+  await errorToast.safeExecute(async () => {
+    await notificationPost({
+      data: {
+        en: enText.value,
+        ru: ruText.value
+      },
+      notify: notifyCheck.value
+    })
+  })
 };
 </script>
