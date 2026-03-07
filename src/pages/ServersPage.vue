@@ -2,20 +2,9 @@
   <Card>
     <template #title>Servers</template>
     <template #content>
-      <DataTable
-        :value="servers.items"
-        dataKey="id"
-        editMode="cell"
-        :loading="servers.loading"
-        @cell-edit-complete="cellEdit"
-        paginator
-        lazy
-        v-model:rows="servers.rows"
-        :rows-per-page-options="[5, 10, 20]"
-        :first="servers.first"
-        :total-records="servers.totalRecords"
-        paginator-position="both"
-      >
+      <DataTable :value="servers.items" dataKey="id" editMode="cell" :loading="servers.loading"
+        @cell-edit-complete="cellEdit" paginator lazy v-model:rows="servers.rows" :rows-per-page-options="[5, 10, 20]"
+        :first="servers.first" :total-records="servers.totalRecords" paginator-position="both">
         <template #loading>
           <div class="flex gap-2">
             <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -53,22 +42,27 @@
         </Column>
         <Column header="Manage">
           <template #body="slotProps">
-            <Button
-              icon="pi pi-pencil"
-              size="small"
-              severity="secondary"
-              @click="onEditServer(slotProps.data as Server)"
-            />
+            <Button severity="secondary" @click="onEditServer(slotProps.data as Server)">
+              <template #icon>
+                <Icon icon="line-md:edit" width="24" height="24" />
+              </template>
+            </Button>
+          </template>
+        </Column>
+        <Column header="Inbounds">
+          <template #body="slotProps">
+            <Button severity="secondary"
+              @click="router.push({ name: 'inbounds', params: { serverId: (slotProps.data as Server).id } })">
+              <template #icon>
+                <Icon icon="line-md:list" width="24" height="24" />
+              </template>
+            </Button>
           </template>
         </Column>
       </DataTable>
     </template>
   </Card>
-  <ServerEditDialog
-    v-model:visible="editDialogVisible"
-    :server="serverInEdit"
-    @save-server="onServerUpdate"
-  />
+  <ServerEditDialog v-model:visible="editDialogVisible" :server="serverInEdit" @save-server="onServerUpdate" />
 </template>
 
 <script setup lang="ts">
@@ -83,6 +77,7 @@ import useCopyGuid from '@/composables/useCopyGuid';
 import { useServersStore } from '@/stores/servers';
 import { useToast } from 'primevue/usetoast';
 import type { DataTableCellEditCompleteEvent } from 'primevue/datatable';
+import { useRouter } from 'vue-router';
 
 // #endregion
 
@@ -91,6 +86,7 @@ import type { DataTableCellEditCompleteEvent } from 'primevue/datatable';
 const { copyGuid } = useCopyGuid();
 const servers = useServersStore();
 const toast = useToast();
+const router = useRouter();
 
 // #endregion
 
