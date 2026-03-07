@@ -5,6 +5,7 @@
       <RouterLink to="/users" class="router-link-btn">Users</RouterLink>
       <RouterLink to="/tariffs" class="router-link-btn">Tariffs</RouterLink>
       <RouterLink to="/servers" class="router-link-btn">Servers</RouterLink>
+      <RouterLink to="/notifications" class="router-link-btn">Notifications</RouterLink>
     </div>
   </div>
 </template>
