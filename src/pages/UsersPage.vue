@@ -3,9 +3,20 @@
     <Card>
       <template #title>Users</template>
       <template #content>
-        <DataTable :value="users.items" dataKey="id" editMode="cell" :loading="loadingTable"
-          @cell-edit-complete="cellEdit" paginator lazy v-model:rows="users.rows" :rows-per-page-options="[5, 10, 20]"
-          :first="users.first" :total-records="users.totalRecords" paginator-position="both">
+        <DataTable
+          :value="users.items"
+          dataKey="id"
+          editMode="cell"
+          :loading="loadingTable"
+          @cell-edit-complete="cellEdit"
+          paginator
+          lazy
+          v-model:rows="users.rows"
+          :rows-per-page-options="[5, 10, 20]"
+          :first="users.first"
+          :total-records="users.totalRecords"
+          paginator-position="both"
+        >
           <template #loading>
             <div class="flex gap-2">
               <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -29,22 +40,35 @@
           <Column field="telegram_username" header="TG Username"> </Column>
           <Column field="balance" header="Balance">
             <template #body="slotProps">
-              <Button severity="secondary" rounded
-                @click="router.push({ name: 'balance', params: { userId: (slotProps.data as User).id } })">
+              <Button
+                severity="secondary"
+                rounded
+                @click="
+                  router.push({ name: 'balance', params: { userId: (slotProps.data as User).id } })
+                "
+              >
                 <Icon icon="line-md:clipboard-list"></Icon>
               </Button>
             </template>
           </Column>
           <Column field="tariff" header="Tariff">
             <template #body="slotProps">
-              <Select :modelValue="(slotProps.data as User).tariff.id"
-                @update:modelValue="updateTariff((slotProps.data as User).id, $event)" :options="tariffs.shortList"
-                optionLabel="name" optionValue="id"></Select>
+              <Select
+                :modelValue="(slotProps.data as User).tariff.id"
+                @update:modelValue="updateTariff((slotProps.data as User).id, $event)"
+                :options="tariffs.shortList"
+                optionLabel="name"
+                optionValue="id"
+              ></Select>
             </template>
           </Column>
           <Column field="settings" header="Settings">
             <template #body="slotProps">
-              <Button severity="secondary" rounded @click="openSettingsModal(slotProps.data as User)">
+              <Button
+                severity="secondary"
+                rounded
+                @click="openSettingsModal(slotProps.data as User)"
+              >
                 <Icon icon="line-md:cog-loop"></Icon>
               </Button>
             </template>
@@ -59,10 +83,20 @@
         </DataTable>
       </template>
     </Card>
-    <CheckboxDialog v-model:visible="rightsVisible" :header="'Permission settings for ' + userInEdit?.telegram_username"
-      :data="userInEdit?.rights ?? {}" :locale="userPermissionsLocale" @save="saveRightsModal" />
-    <CheckboxDialog v-model:visible="settingsVisible" :header="'Account settings for ' + userInEdit?.telegram_username"
-      :data="userInEdit?.settings ?? {}" :locale="userSettingsLocale" @save="saveSettingsModal" />
+    <CheckboxDialog
+      v-model:visible="rightsVisible"
+      :header="'Permission settings for ' + userInEdit?.telegram_username"
+      :data="userInEdit?.rights ?? {}"
+      :locale="userPermissionsLocale"
+      @save="saveRightsModal"
+    />
+    <CheckboxDialog
+      v-model:visible="settingsVisible"
+      :header="'Account settings for ' + userInEdit?.telegram_username"
+      :data="userInEdit?.settings ?? {}"
+      :locale="userSettingsLocale"
+      @save="saveSettingsModal"
+    />
   </div>
 </template>
 
@@ -70,12 +104,7 @@
 // #region Imports
 
 import { Icon } from '@iconify/vue';
-import {
-  type User,
-  type UserPatch,
-  type UserRights,
-  type UserSettings,
-} from '@/api/user/schema';
+import { type User, type UserPatch, type UserRights, type UserSettings } from '@/api/user/schema';
 import userPermissionsLocale from '@/utils/locale/userPermissionsLocale';
 import type { DataTableCellEditCompleteEvent } from 'primevue/datatable';
 import { onMounted, ref, watch } from 'vue';
@@ -105,7 +134,7 @@ const openRightsModal = (user: User) => {
   userInEdit.value = user;
 
   rightsVisible.value = true;
-}
+};
 
 /**
  * Saves the changes made to the user's rights in the user rights modal.
@@ -114,7 +143,7 @@ const openRightsModal = (user: User) => {
 const saveRightsModal = async (updatedUserRights: Record<string, boolean>) => {
   // Send the updated rights to the server
   await users.update(userInEdit.value!.id, {
-    rights: updatedUserRights as UserRights
+    rights: updatedUserRights as UserRights,
   });
 
   userInEdit.value = null;
@@ -125,7 +154,7 @@ const openSettingsModal = (user: User) => {
   userInEdit.value = user;
 
   settingsVisible.value = true;
-}
+};
 
 /**
  * Saves the user settings in the settings modal.
@@ -134,7 +163,7 @@ const openSettingsModal = (user: User) => {
  */
 const saveSettingsModal = async (updatedUserSettings: Record<string, boolean>) => {
   await users.update(userInEdit.value!.id, {
-    settings: updatedUserSettings as UserSettings
+    settings: updatedUserSettings as UserSettings,
   });
 
   userInEdit.value = null;
@@ -142,9 +171,9 @@ const saveSettingsModal = async (updatedUserSettings: Record<string, boolean>) =
 
 const updateTariff = async (userId: Uuid, tariffId: Uuid) => {
   await users.update(userId, {
-    tariff_id: tariffs.items.find((tariff) => tariff.id === tariffId)!.id
-  })
-}
+    tariff_id: tariffs.items.find((tariff) => tariff.id === tariffId)!.id,
+  });
+};
 
 const cellEdit = async (event: DataTableCellEditCompleteEvent<User>) => {
   const patchObj = {} as UserPatch;
@@ -167,16 +196,19 @@ onMounted(async () => {
   await users.initialize();
 });
 
-watch(() => users.error, (err) => {
-  if (err) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: err,
-      life: 3000
-    })
+watch(
+  () => users.error,
+  (err) => {
+    if (err) {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: err,
+        life: 3000,
+      });
 
-    users.error = null;
-  }
-})
+      users.error = null;
+    }
+  },
+);
 </script>

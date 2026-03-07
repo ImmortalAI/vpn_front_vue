@@ -3,8 +3,13 @@
     <Card>
       <template #title>Tariffs </template>
       <template #content>
-        <DataTable editMode="cell" :value="tariffs" dataKey="id" @cellEditComplete="onUpdateFieldTariff"
-          :loading="dataTableLoading">
+        <DataTable
+          editMode="cell"
+          :value="tariffs"
+          dataKey="id"
+          @cellEditComplete="onUpdateFieldTariff"
+          :loading="dataTableLoading"
+        >
           <template #loading>
             <div class="flex gap-2">
               <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -22,7 +27,7 @@
                 (slotProps.data.id as string).slice(0, 8) +
                 ' *** ' +
                 (slotProps.data.id as string).slice(-4)
-                }}</span>
+              }}</span>
             </template>
           </Column>
           <Column field="name" header="Name">
@@ -40,14 +45,23 @@
               {{ (slotProps.data as Tariff).price / 100 }}
             </template>
             <template #editor="{ data }">
-              <InputNumber :modelValue="(data as Tariff).price / 100"
-                @update:modelValue="val => (data as Tariff).price = Math.round(val * 100)" mode="currency"
-                currency="RUB" locale="ru-RU" />
+              <InputNumber
+                :modelValue="(data as Tariff).price / 100"
+                @update:modelValue="(val) => ((data as Tariff).price = Math.round(val * 100))"
+                mode="currency"
+                currency="RUB"
+                locale="ru-RU"
+              />
             </template>
           </Column>
           <Column field="traffic" header="Traffic (GiB)">
             <template #editor="{ data }">
-              <InputNumber v-model="(data as Tariff).traffic" :useGrouping="false" :min="0" suffix=" GiB" />
+              <InputNumber
+                v-model="(data as Tariff).traffic"
+                :useGrouping="false"
+                :min="0"
+                suffix=" GiB"
+              />
             </template>
           </Column>
           <Column field="price_of_traffic_reset" header="Price (Reset)">
@@ -55,25 +69,43 @@
               {{ (slotProps.data as Tariff).price_of_traffic_reset / 100 }}
             </template>
             <template #editor="{ data }">
-              <InputNumber :modelValue="(data as Tariff).price_of_traffic_reset / 100"
-                @update:modelValue="val => (data as Tariff).price_of_traffic_reset = Math.round(val * 100)"
-                mode="currency" currency="RUB" locale="ru-RU" />
+              <InputNumber
+                :modelValue="(data as Tariff).price_of_traffic_reset / 100"
+                @update:modelValue="
+                  (val) => ((data as Tariff).price_of_traffic_reset = Math.round(val * 100))
+                "
+                mode="currency"
+                currency="RUB"
+                locale="ru-RU"
+              />
             </template>
           </Column>
           <Column header="Manage">
             <template #body="slotProps">
               <div class="flex gap-4">
-                <Button icon="pi pi-pencil" class="p-button-success" size="small"
-                  @click="onEditTariff(slotProps.data as Tariff)" />
-                <Button icon="pi pi-trash" class="p-button-danger" size="small"
-                  @click="apiDeleteTariff((slotProps.data as Tariff).id)" />
+                <Button
+                  icon="pi pi-pencil"
+                  class="p-button-success"
+                  size="small"
+                  @click="onEditTariff(slotProps.data as Tariff)"
+                />
+                <Button
+                  icon="pi pi-trash"
+                  class="p-button-danger"
+                  size="small"
+                  @click="apiDeleteTariff((slotProps.data as Tariff).id)"
+                />
               </div>
             </template>
           </Column>
         </DataTable>
       </template>
     </Card>
-    <TariffEditDialog v-model:visible="editDialogVisible" :tariff="tariffInEdit" @saveTariff="onTariffUpdate" />
+    <TariffEditDialog
+      v-model:visible="editDialogVisible"
+      :tariff="tariffInEdit"
+      @saveTariff="onTariffUpdate"
+    />
   </div>
 </template>
 

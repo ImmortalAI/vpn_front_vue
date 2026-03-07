@@ -2,9 +2,20 @@
   <Card>
     <template #title>Servers</template>
     <template #content>
-      <DataTable :value="servers.items" dataKey="id" editMode="cell" :loading="servers.loading"
-        @cell-edit-complete="cellEdit" paginator lazy v-model:rows="servers.rows" :rows-per-page-options="[5, 10, 20]"
-        :first="servers.first" :total-records="servers.totalRecords" paginator-position="both">
+      <DataTable
+        :value="servers.items"
+        dataKey="id"
+        editMode="cell"
+        :loading="servers.loading"
+        @cell-edit-complete="cellEdit"
+        paginator
+        lazy
+        v-model:rows="servers.rows"
+        :rows-per-page-options="[5, 10, 20]"
+        :first="servers.first"
+        :total-records="servers.totalRecords"
+        paginator-position="both"
+      >
         <template #loading>
           <div class="flex gap-2">
             <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -42,14 +53,22 @@
         </Column>
         <Column header="Manage">
           <template #body="slotProps">
-            <Button icon="pi pi-pencil" size="small" severity="secondary"
-              @click="onEditServer(slotProps.data as Server)" />
+            <Button
+              icon="pi pi-pencil"
+              size="small"
+              severity="secondary"
+              @click="onEditServer(slotProps.data as Server)"
+            />
           </template>
         </Column>
       </DataTable>
     </template>
   </Card>
-  <ServerEditDialog v-model:visible="editDialogVisible" :server="serverInEdit" @save-server="onServerUpdate" />
+  <ServerEditDialog
+    v-model:visible="editDialogVisible"
+    :server="serverInEdit"
+    @save-server="onServerUpdate"
+  />
 </template>
 
 <script setup lang="ts">
@@ -90,33 +109,36 @@ const onEditServer = async (server: Server) => {
 
 const onServerUpdate = async (updated: Server) => {
   if (updated.id !== '') {
-    await servers.update(updated)
+    await servers.update(updated);
   } else {
-    await servers.create(updated)
+    await servers.create(updated);
   }
 };
 
 const cellEdit = async (e: DataTableCellEditCompleteEvent<Server>) => {
   await servers.update({
     id: e.data.id,
-    [e.field]: e.newValue
+    [e.field]: e.newValue,
   } as Server);
-}
+};
 
 onMounted(async () => {
   await servers.initialize();
 });
 
-watch(() => servers.error, (error) => {
-  if (error) {
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error,
-      life: 3000,
-    })
+watch(
+  () => servers.error,
+  (error) => {
+    if (error) {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error,
+        life: 3000,
+      });
 
-    servers.error = null;
-  }
-});
+      servers.error = null;
+    }
+  },
+);
 </script>

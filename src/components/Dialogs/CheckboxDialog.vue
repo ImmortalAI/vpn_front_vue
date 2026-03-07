@@ -27,9 +27,12 @@ const emits = defineEmits<{
 
 const dataInEdit = ref<Record<string, boolean>>(props.data);
 
-watch(() => props.data, () => {
-  dataInEdit.value = { ...props.data };
-})
+watch(
+  () => props.data,
+  () => {
+    dataInEdit.value = { ...props.data };
+  },
+);
 
 const save = (e: PointerEvent) => {
   e.preventDefault();

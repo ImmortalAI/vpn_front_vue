@@ -41,10 +41,10 @@ const sendMessage = async () => {
     await notificationPost({
       data: {
         en: enText.value,
-        ru: ruText.value
+        ru: ruText.value,
       },
-      notify: notifyCheck.value
-    })
-  })
+      notify: notifyCheck.value,
+    });
+  });
 };
 </script>
