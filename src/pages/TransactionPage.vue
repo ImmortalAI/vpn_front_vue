@@ -9,47 +9,25 @@
           <Fluid class="flex flex-col gap-2">
             <span>Create new transaction</span>
             <IftaLabel>
-              <Select
-                v-model="chosenTransactionType"
-                :options="allTransactionTypes"
-                optionLabel="label"
-                labelId="transaction-type-select"
-                class="w-full"
-              ></Select>
+              <Select v-model="chosenTransactionType" :options="allTransactionTypes" optionLabel="label"
+                labelId="transaction-type-select" class="w-full"></Select>
               <label for="transaction-type-select">Type</label>
             </IftaLabel>
             <IftaLabel>
-              <InputNumber
-                v-model="chosenTransactionAmount"
-                inputId="transaction-amount-input"
-                mode="currency"
-                currency="RUB"
-                locale="ru-RU"
-                showClear
-              ></InputNumber>
+              <InputNumber v-model="chosenTransactionAmount" inputId="transaction-amount-input" mode="currency"
+                currency="RUB" locale="ru-RU" showClear></InputNumber>
               <label for="transaction-amount-input">Amount</label>
             </IftaLabel>
             <IftaLabel>
-              <Textarea
-                v-model="chosenTransactionDescription"
-                inputId="transaction-description-input"
-              />
+              <Textarea v-model="chosenTransactionDescription" inputId="transaction-description-input" />
               <label for="transaction-description-input">Description</label>
             </IftaLabel>
             <Button @click="onAddNewTransaction">Add</Button>
           </Fluid>
         </div>
         <Divider layout="vertical" />
-        <DataTable
-          class="w-full"
-          :value="transactions.items"
-          lazy
-          paginator
-          :rows="transactions.rows"
-          :first="transactions.first"
-          :total-records="transactions.totalRecords"
-          :loading="transactions.loading"
-        >
+        <DataTable class="w-full" :value="transactions.items" lazy paginator :rows="transactions.rows"
+          :first="transactions.first" :total-records="transactions.totalRecords" :loading="transactions.loading">
           <template #loading>
             <Skeleton width="100%" height="400px" />
           </template>
@@ -120,7 +98,10 @@ const onAddNewTransaction = async () => {
 };
 
 onMounted(async () => {
-  if (typeof userId !== 'string') router.push({ name: 'not-found' });
+  if (typeof userId !== 'string') {
+    router.push({ name: 'not-found' });
+    return;
+  }
 
   // Assigning the value triggers watch effect in the store, which fetches the data
   transactions.userId = userId as Uuid;
