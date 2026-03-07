@@ -1,5 +1,6 @@
 // #region imports
 import * as z from 'zod';
+import { PaginationSchema } from '../base/schema';
 // #endregion
 
 export const TransactionTypeSchema = z.enum(['refund', 'replenishment', 'withdrawal']);
@@ -16,10 +17,8 @@ export const TransactionSchema = z.object({
 
 export type Transaction = z.infer<typeof TransactionSchema>;
 
-export const TransactionQuerySchema = z.object({
+export const TransactionPaginationSchema = PaginationSchema.extend({
   user_id: z.uuid().optional(),
-  limit: z.number().int().optional(),
-  offset: z.number().int().optional(),
 });
 
-export type TransactionQuery = z.infer<typeof TransactionQuerySchema>;
+export type TransactionPagination = z.infer<typeof TransactionPaginationSchema>;

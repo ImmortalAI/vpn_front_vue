@@ -1,10 +1,10 @@
 // #region imports
 import apiClient from '@/utils/apiClient';
 import {
-  TransactionQuerySchema,
+  TransactionPaginationSchema,
   TransactionSchema,
   type Transaction,
-  type TransactionQuery,
+  type TransactionPagination,
 } from '@/api/transaction/schema';
 import { UuidSchema, type Uuid } from '../base/schema';
 import z from 'zod';
@@ -37,8 +37,8 @@ export async function transactionPost(transactionData: Transaction): Promise<Tra
  * @returns {Promise<Transaction[]>} An array of transaction data.
  * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
  */
-export async function transactionGet(data?: TransactionQuery): Promise<Transaction[]> {
-  TransactionQuerySchema.parse(data ?? {});
+export async function transactionGet(data?: TransactionPagination): Promise<Transaction[]> {
+  TransactionPaginationSchema.parse(data ?? {});
   const response = await apiClient.get<Transaction[]>('/transactions', {
     params: data ?? {},
   });
