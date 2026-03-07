@@ -47,20 +47,15 @@ export const getEmptyServer = (): Server => ({
   panel_password: '',
 });
 
-// request post /servers
 export const NewServerSchema = ServerSchema.omit({
   id: true,
 });
 
 export type NewServer = z.infer<typeof NewServerSchema>;
 
-// request patch /servers/{server_id}
 export const PartialServerSchema = ServerSchema.omit({ id: true }).partial();
 
 export type PartialServer = z.infer<typeof PartialServerSchema>;
-
-// response patch /servers/{server_id}
-export { ServerSchema as ServerPatchRsSchema, type Server as ServerPatchRs };
 
 export const InboundPaginationSchema = PaginationSchema.extend({
   server_id: z.uuid().optional(),

@@ -2,10 +2,9 @@
   <Card>
     <template #title>Servers</template>
     <template #content>
-      <DataTable :value="servers.pages[currentPage] ?? []" dataKey="id" editMode="cell" :loading="loadingTable"
-        @cell-edit-complete="(e) => console.log(e)" paginator lazy v-model:rows="rowsPerPageNumber"
-        :rows-per-page-options="[5, 10, 20]" :first="firstItemOnPage" :total-records="servers.count"
-        paginator-position="both" @page="changePage">
+      <DataTable :value="servers.items" dataKey="id" editMode="cell" :loading="servers.loading"
+        @cell-edit-complete="cellEdit" paginator lazy v-model:rows="servers.rows" :rows-per-page-options="[5, 10, 20]"
+        :first="servers.first" :total-records="servers.totalRecords" paginator-position="both">
         <template #loading>
           <div class="flex gap-2">
             <Icon width="2rem" icon="line-md:loading-loop"></Icon>
@@ -23,7 +22,7 @@
               (slotProps.data.id as string).slice(0, 8) +
               ' *** ' +
               (slotProps.data.id as string).slice(-4)
-              }}</span>
+            }}</span>
           </template>
         </Column>
         <Column field="ip" header="IP Address">
@@ -57,24 +56,22 @@
 // #region Imports
 
 import type { Server } from '@/api/server/schema';
-import useErrorToast from '@/composables/useErrorToast';
-import {
-  type DataTablePageEvent,
-} from 'primevue/datatable';
-import { computed, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import IpInput from '@/components/IpInput.vue';
 import ServerEditDialog from '@/components/Dialogs/ServerEditDialog.vue';
 import useCopyGuid from '@/composables/useCopyGuid';
 import { useServersStore } from '@/stores/servers';
+import { useToast } from 'primevue/usetoast';
+import type { DataTableCellEditCompleteEvent } from 'primevue/datatable';
 
 // #endregion
 
 // #region Composables
 
-const errorToast = useErrorToast();
 const { copyGuid } = useCopyGuid();
 const servers = useServersStore();
+const toast = useToast();
 
 // #endregion
 
@@ -93,66 +90,33 @@ const onEditServer = async (server: Server) => {
 
 const onServerUpdate = async (updated: Server) => {
   if (updated.id !== '') {
-    await errorToast.safeExecute(async () => {
-      await servers.update(currentPage.value, updated)
-    });
+    await servers.update(updated)
   } else {
-    await errorToast.safeExecute(async () => {
-      await servers.create(updated)
-    });
+    await servers.create(updated)
   }
 };
 
-/* const refreshServer = (updatedServer: Server) => {
-  const replaceTariffIdx = servers.value.findIndex((srv) => srv.id === updatedServer.id);
-  if (replaceTariffIdx === -1) {
+const cellEdit = async (e: DataTableCellEditCompleteEvent<Server>) => {
+  await servers.update({
+    id: e.data.id,
+    [e.field]: e.newValue
+  } as Server);
+}
+
+onMounted(async () => {
+  await servers.initialize();
+});
+
+watch(() => servers.error, (error) => {
+  if (error) {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: 'Updated server was not found in the data table',
-    });
-    return;
+      detail: error,
+      life: 3000,
+    })
+
+    servers.error = null;
   }
-  servers.value.splice(replaceTariffIdx, 1, updatedServer);
-}; */
-
-const loadingTable = ref<boolean>(true);
-
-onMounted(async () => {
-  await errorToast.safeExecute(async () => {
-    await servers.init();
-  })
-
-  loadingTable.value = false;
 });
-
-const currentPage = ref(0);
-
-const firstItemOnPage = computed(() => currentPage.value * servers.pageSize);
-
-const rowsPerPageNumber = ref(5);
-
-watch(rowsPerPageNumber, async (newVal) => {
-  loadingTable.value = true;
-
-  await errorToast.safeExecute(async () => {
-    await servers.init(newVal);
-  })
-  currentPage.value = 0;
-
-  loadingTable.value = false;
-})
-
-const changePage = async (event: DataTablePageEvent) => {
-  if (event.rows !== servers.pageSize) return;
-
-  loadingTable.value = true;
-
-  await errorToast.safeExecute(async () => {
-    await servers.loadPage(event.page);
-    currentPage.value = event.page;
-  })
-
-  loadingTable.value = false;
-}
 </script>

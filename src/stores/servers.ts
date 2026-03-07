@@ -1,166 +1,190 @@
-import type { Server, PartialServer } from '@/api/server/schema';
+import type { Server } from '@/api/server/schema';
 import { serverCount, serverGet, serverIdPatch, serverPost } from '@/api/server/service';
+import errorExtractor from '@/utils/errorExtractor';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, watch, type Ref } from 'vue';
 
 /**
- * Store for managing paginated server data.
- *
- * Provides methods for initializing, loading pages, creating, and updating servers.
+ * Pinia store for managing server list.
+ * Provides CRUD operations with pagination support.
  */
 export const useServersStore = defineStore('servers', () => {
   /**
-   * A record mapping page indices to arrays of servers.
-   * Each key represents a zero-based page index, and the value is
-   * the array of {@link Server} objects loaded for that page.
+   * List of servers on the current page
+   * @type {Ref<Server[]>}
    */
-  const pages = ref<Record<number, Server[]>>({});
-
-  /** Total number of servers available on the backend. */
-  const count = ref(0);
-
-  /** Number of servers fetched per page. */
-  const pageSize = ref(5);
+  const items: Ref<Server[]> = ref<Server[]>([]);
 
   /**
-   * Set of page indices that are currently being fetched.
-   * Used to prevent duplicate concurrent requests for the same page
-   * and to cancel stale loads when {@link init} is called.
+   * Total number of records in the database
+   * @type {Ref<number>}
    */
-  const loadingPages = new Set<number>();
+  const totalRecords: Ref<number> = ref(0);
 
   /**
-   * Initializes (or re-initializes) the store by resetting all cached pages,
-   * fetching the total server count, and loading the first page.
-   *
-   * @param initialPageSize - Number of servers per page. Defaults to `5`.
-   * @returns A promise that resolves once initialization is complete.
-   * @throws {AxiosError} If any of the underlying API calls
-   *   ({@link serverCount}, {@link serverGet}) fail.
+   * Loading state flag
+   * @type {Ref<boolean>}
    */
-  const init = async (initialPageSize: number = 5): Promise<void> => {
-    pageSize.value = initialPageSize;
-    pages.value = {};
-    loadingPages.clear();
-
-    const [srvCount, srvPage] = await Promise.all([
-      serverCount(),
-      serverGet({ limit: initialPageSize }),
-    ]);
-
-    count.value = srvCount;
-    pages.value[0] = srvPage;
-  };
+  const loading: Ref<boolean> = ref(false);
 
   /**
-   * Loads a specific page of servers into the store.
-   *
-   * If the page is already loaded or is currently being fetched, the call
-   * is a no-op. If {@link init} is called while a page is loading, the
-   * in-flight result is discarded to avoid writing stale data.
-   *
-   * @param indexPage - Zero-based page index to load.
-   * @returns A promise that resolves once the page has been loaded (or skipped).
-   * @throws {AxiosError} If the underlying {@link serverGet} call fails.
-   * @throws {ZodError} If the underlying {@link serverGet} call fails.
+   * Error message (null if no errors)
+   * @type {Ref<string | null>}
    */
-  const loadPage = async (indexPage: number): Promise<void> => {
-    if (pages.value[indexPage] || loadingPages.has(indexPage)) return;
+  const error: Ref<string | null> = ref<string | null>(null);
 
-    loadingPages.add(indexPage);
+  /**
+   * Index of the first item on current page (for pagination)
+   * @type {Ref<number>}
+   */
+  const first: Ref<number> = ref(0);
+
+  /**
+   * Number of rows per page
+   * @type {Ref<number>}
+   */
+  const rows: Ref<number> = ref(10);
+
+  /**
+   * Store initialization flag (prevents redundant loading)
+   * @type {Ref<boolean>}
+   */
+  const isInitialized: Ref<boolean> = ref(false);
+
+  /**
+   * Initializes the store: fetches total record count
+   * and loads the first page of data.
+   * This method is idempotent - subsequent calls are ignored.
+   *
+   * @async
+   * @returns {Promise<void>}
+   *
+   * @example
+   * ```ts
+   * // In a component
+   * onMounted(async () => {
+   *   await serversStore.initialize();
+   * });
+   * ```
+   */
+  const initialize = async (): Promise<void> => {
+    if (isInitialized.value) return;
+
+    loading.value = true;
 
     try {
-      const newPage = await serverGet({
-        offset: indexPage * pageSize.value,
-        limit: pageSize.value,
-      });
+      const countItems = await serverCount();
+      const page = await serverGet({ offset: first.value, limit: rows.value });
 
-      // If init() called then we should stop loading this page
-      if (!loadingPages.has(indexPage)) return;
-
-      pages.value[indexPage] = newPage;
+      totalRecords.value = countItems;
+      items.value = page;
+      isInitialized.value = true;
+    } catch (e) {
+      const msg = errorExtractor(e);
+      error.value = msg;
+      console.error(msg);
     } finally {
-      loadingPages.delete(indexPage);
+      loading.value = false;
     }
   };
 
   /**
-   * Creates a new server on the backend and re-initializes the store so
-   * that the paginated data reflects the newly added entry.
+   * Fetches data for the current page.
+   * Uses current `first` and `rows` values for pagination.
    *
-   * @param server - The {@link Server} object to create.
-   * @returns A promise that resolves once the server has been created and the
-   *   store has been re-initialized.
-   * @throws {AxiosError} If the underlying {@link serverPost}
-   *   call or the subsequent {@link init} call fails.
+   * @async
+   * @param {boolean} [noLoading=false] - If true, does not toggle loading flag
+   *                                      (useful for background updates)
+   * @returns {Promise<void>}
+   *
+   * @example
+   * ```ts
+   * // Regular fetch with loading indicator
+   * await serversStore.fetchData();
+   *
+   * // Background update without loading indicator
+   * await serversStore.fetchData(true);
+   * ```
    */
-  const create = async (server: Server) => {
-    await serverPost(server);
-    await init(pageSize.value);
+  const fetchData = async (noLoading: boolean = false): Promise<void> => {
+    if (!noLoading) loading.value = true;
+    error.value = null;
+
+    try {
+      const page = await serverGet({ offset: first.value, limit: rows.value });
+      items.value = page;
+    } catch (e) {
+      const msg = errorExtractor(e);
+      error.value = msg;
+      console.error(msg);
+    } finally {
+      if (!noLoading) loading.value = false;
+    }
   };
 
   /**
-   * Patches an existing server with only the fields that have changed and
-   * updates the corresponding entry in the store's page cache in-place.
+   * Creates a new server and refreshes the list.
+   * If occurs an error, error message is stored in `error` state.
    *
-   * Only fields whose values differ from the currently cached server are
-   * included in the PATCH request. If no fields have changed, the method
-   * returns immediately without making an API call.
-   *
-   * @param pageNum - Zero-based page index where the server is located.
-   * @param server  - The {@link Server} object containing updated field values.
-   *   Must include a valid `id` that matches an entry on the given page.
-   * @returns A promise that resolves once the server has been patched and the
-   *   local cache has been updated (or immediately if nothing changed).
-   * @throws {Error} If the specified page is not loaded in the store.
-   * @throws {Error} If a server with the given `id` is not found on the
-   *   specified page.
-   * @throws {AxiosError} If the underlying
-   *   {@link serverIdPatch} call fails.
-   * @throws {ZodError} If the underlying
-   *   {@link serverIdPatch} call fails.
+   * @async
+   * @param {Server} server - Server object to create
+   * @returns {Promise<void>}
    */
-  const update = async (pageNum: number, server: Server) => {
-    const currentPage = pages.value[pageNum];
-    if (!currentPage) {
-      throw new Error('Current page is not loaded, unable to update one of its servers');
+  const create = async (server: Server): Promise<void> => {
+    loading.value = true;
+
+    try {
+      await serverPost(server);
+      await fetchData(true);
+    } catch (e) {
+      const msg = errorExtractor(e);
+      error.value = msg;
+      console.error(msg);
+    } finally {
+      loading.value = false;
     }
-
-    const oldIndex = currentPage.findIndex((o) => {
-      return o.id === server.id;
-    });
-
-    if (oldIndex === -1) {
-      throw new Error('Server to update was not found in the current page');
-    }
-
-    const old = currentPage[oldIndex] as Server;
-
-    const changes: PartialServer = {};
-    (Object.keys(server) as (keyof Server)[]).forEach((val) => {
-      if (val == 'id') return;
-
-      if (server[val] !== old[val]) {
-        (changes as Record<keyof Server, unknown>)[val] = server[val];
-      }
-    });
-
-    if (Object.keys(changes).length === 0) {
-      return;
-    }
-
-    const newServer = await serverIdPatch(server.id, changes);
-
-    currentPage.splice(oldIndex, 1, newServer);
   };
+
+  /**
+   * Updates an existing server by ID and refreshes the list.
+   * If occurs an error, error message is stored in `error` state.
+   *
+   * @async
+   * @param {Server} server - Server object with updated data
+   *                          (must contain a valid `id`)
+   * @returns {Promise<void>}
+   */
+  const update = async (server: Server): Promise<void> => {
+    loading.value = true;
+
+    try {
+      await serverIdPatch(server.id, server);
+      await fetchData(true);
+    } catch (e) {
+      const msg = errorExtractor(e);
+      error.value = msg;
+      console.error(msg);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // Automatically fetch data when pagination page changes
+  watch([first, rows], async () => {
+    await fetchData();
+  });
 
   return {
-    pages,
-    count,
-    pageSize,
+    items,
+    totalRecords,
+    loading,
+    error,
+    first,
+    rows,
+
+    initialize,
+    fetchData,
     create,
     update,
-    init,
-    loadPage,
   };
 });
