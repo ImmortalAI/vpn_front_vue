@@ -1,6 +1,6 @@
 // #region imports
 import * as z from 'zod';
-import { MessageRsSchema, PaginationSchema, type MessageRs } from '@/api/base/schema';
+import { PaginationSchema } from '@/api/base/schema';
 // #endregion
 
 export const InboundSchema = z.object({
@@ -14,6 +14,16 @@ export const InboundSchema = z.object({
 });
 
 export type Inbound = z.infer<typeof InboundSchema>;
+
+export const getEmptyInbound = (): Inbound => ({
+  id: '',
+  inbound_id: 0,
+  protocol: '',
+  template: '',
+  name: '',
+  description: '',
+  is_available: false,
+});
 
 export const ServerSchema = z.object({
   id: z.uuid(),
@@ -70,39 +80,3 @@ export type NewInbound = z.infer<typeof NewInboundSchema>;
 export const UpdateInboundSchema = InboundSchema.omit({ id: true }).partial();
 
 export type UpdateInbound = z.infer<typeof UpdateInboundSchema>;
-
-// response get /servers/inbounds
-export const InboundsGetRsSchema = z.array(InboundSchema);
-
-export type InboundsGetRs = z.infer<typeof InboundsGetRsSchema>;
-
-// request get /servers/inbounds/count
-export const InboundsCountRqSchema = z.object({
-  server_id: z.uuid().optional(),
-});
-
-export type InboundsCountRq = z.infer<typeof InboundsCountRqSchema>;
-
-// response get /servers/inbounds/count
-export const InboundsCountRsSchema = z.number().int().min(0);
-
-export type InboundsCountRs = z.infer<typeof InboundsCountRsSchema>;
-
-// request post /servers/inbounds/{server_id}
-export const InboundsPostRqSchema = InboundSchema.omit({ id: true });
-
-export type InboundsPostRq = z.infer<typeof InboundsPostRqSchema>;
-
-// response post /servers/inbounds/{server_id}
-export { InboundSchema as InboundsPostRsSchema, type Inbound as InboundsPostRs };
-
-// response get /servers/inbounds/{server_inbound_id}
-export { InboundSchema as InboundsGetByIdRsSchema, type Inbound as InboundsGetByIdRs };
-
-// request patch /servers/inbounds/{server_inbound_id}
-export const InboundsPatchRqSchema = InboundSchema.omit({ id: true }).partial();
-
-export type InboundsPatchRq = z.infer<typeof InboundsPatchRqSchema>;
-
-// response patch /servers/inbounds/{server_inbound_id}
-export { MessageRsSchema as InboundsPatchRsSchema, type MessageRs as InboundsPatchRs };

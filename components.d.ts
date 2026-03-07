@@ -26,6 +26,7 @@ declare module 'vue' {
     Fluid: typeof import('primevue/fluid')['default']
     Form: typeof import('@primevue/forms/form')['default']
     IftaLabel: typeof import('primevue/iftalabel')['default']
+    InboundEditDialog: typeof import('./src/components/Dialogs/InboundEditDialog.vue')['default']
     InputGroup: typeof import('primevue/inputgroup')['default']
     InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
     InputNumber: typeof import('primevue/inputnumber')['default']

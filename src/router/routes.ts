@@ -32,6 +32,11 @@ const routes = [
     component: () => import('@/pages/ServersPage.vue'),
   },
   {
+    path: '/inbounds/:serverId',
+    name: 'inbounds',
+    component: () => import('@/pages/InboundsPage.vue'),
+  },
+  {
     path: '/notifications',
     name: 'notifications',
     component: () => import('@/pages/NotificationPage.vue'),
