@@ -2,11 +2,11 @@
   <Card>
     <template #title>Transactions</template>
     <template #content>
-      <div class="flex">
-        <div class="flex flex-col min-w-48 min-h-72">
-          <span>Баланс: {{ userInEdit?.balance }}</span>
+      <div class="flex w-full">
+        <div class="flex flex-col w-[40%]">
+          <span>Balance: {{ transactions.user?.balance / 100 }}</span>
           <Divider />
-          <div class="flex flex-col gap-2">
+          <Fluid class="flex flex-col gap-2">
             <span>Create new transaction</span>
             <IftaLabel>
               <Select v-model="chosenTransactionType" :options="allTransactionTypes" optionLabel="label"
@@ -14,108 +14,68 @@
               <label for="transaction-type-select">Type</label>
             </IftaLabel>
             <IftaLabel>
-              <InputNumber v-model="chosenTransactionAmount" inputId="transaction-amount-input"></InputNumber>
+              <InputNumber v-model="chosenTransactionAmount" inputId="transaction-amount-input" mode="currency"
+                currency="RUB" locale="ru-RU" showClear></InputNumber>
               <label for="transaction-amount-input">Amount</label>
             </IftaLabel>
+            <IftaLabel>
+              <Textarea v-model="chosenTransactionDescription" inputId="transaction-description-input" />
+              <label for="transaction-description-input">Description</label>
+            </IftaLabel>
             <Button @click="onAddNewTransaction">Add</Button>
-          </div>
+          </Fluid>
         </div>
         <Divider layout="vertical" />
-        <div class="min-w-96 min-h-72">
-          <DataTable :value="transactionsList" :lazy="true" :paginator="true" :rows="maxTransactionRows"
-            @page="onPageChangeTransactions" :totalRecords="totalTransactions" :loading="isLoadingTransactions"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink">
-            <template #loading>
-              <Skeleton width="100%" height="400px" />
+        <DataTable class="w-full" :value="transactions.items" lazy paginator :rows="transactions.rows"
+          :first="transactions.first" :total-records="transactions.totalRecords" :loading="transactions.loading">
+          <template #loading>
+            <Skeleton width="100%" height="400px" />
+          </template>
+          <Column field="transaction_type" header="Type">
+            <template #body="slotProps">
+              {{ transactionsLocale[slotProps.data.transaction_type] || 'Unknown' }}
             </template>
-            <Column field="transaction_type" header="Type">
-              <template #body="slotProps">
-                {{ transactionsLocale[slotProps.data.transaction_type] || 'Unknown' }}
-              </template>
-            </Column>
-            <Column field="amount" header="Amount"> </Column>
-            <Column field="date" header="Date" sortable>
-              <template #body="slotProps">
-                {{ dateTimeFormatter(slotProps.data.date) }}
-              </template>
-            </Column>
-          </DataTable>
-        </div>
+          </Column>
+          <Column field="amount" header="Amount">
+            <template #body="slotProps">
+              {{ (slotProps.data as Transaction).amount / 100 }}
+            </template>
+          </Column>
+          <Column field="date" header="Date">
+            <template #body="slotProps">
+              {{ dateTimeFormatter(slotProps.data.date) }}
+            </template>
+          </Column>
+        </DataTable>
       </div>
     </template>
   </Card>
 </template>
 
 <script setup lang="ts">
-import { useUsersStore } from '@/stores/users';
-import { useRoute } from 'vue-router';
+import type { Uuid } from '@/api/base/schema';
+import type { Transaction, TransactionType } from '@/api/transaction/schema';
+import { useTransactionsStore } from '@/stores/transactions';
+import dateTimeFormatter from '@/utils/dateTimeFormatter';
+import transactionsLocale from '@/utils/locale/transactionsLocale';
+import { useToast } from 'primevue/usetoast';
+import { onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
+declare type TransactionTypeSelector = { label: string; value: TransactionType };
+
+const router = useRouter();
 const route = useRoute();
-const users = useUsersStore();
+const toast = useToast();
+const transactions = useTransactionsStore();
 
-const { id } = route.params;
-
-const transactionsList = ref<TransactionAllGetRs>([]);
-const maxTransactionRows = 5;
-const totalTransactions = ref(0);
-const isLoadingTransactions = ref(false);
-const currentPageTransactions = ref(0);
+const { userId } = route.params;
 
 // Parameters for creating a new transaction
-const allTransactionTypes = ref<{ label: string; value: string }[]>([]);
-const chosenTransactionType = ref<{ label: string; value: string }>();
+const allTransactionTypes = ref<{ label: string; value: TransactionType }[]>([]);
+const chosenTransactionType = ref<{ label: string; value: TransactionType }>({} as TransactionTypeSelector);
 const chosenTransactionAmount = ref<number>(0);
-
-/**
- * Loads the user's transactions based on the current page and limit.
- * Sets isLoadingTransactions to true while loading and false when done.
- */
-const loadTransactions = async () => {
-  isLoadingTransactions.value = true;
-
-  const result = await errorToast.safeExecute(async () => {
-    return await transactionGet({
-      user_id: userInEdit.value!.id,
-      offset: currentPageTransactions.value * maxTransactionRows,
-      limit: maxTransactionRows,
-    });
-  });
-
-  if (result) transactionsList.value = result;
-
-  isLoadingTransactions.value = false;
-};
-
-/**
- * Opens the balance modal for the given user.
- * Loads the user's transactions and sets the total transactions count.
- * @param {User} user - The user to open the modal for.
- */
-const openBalanceModal = async (user: User) => {
-  userInEdit.value = user;
-
-  const result = await errorToast.safeExecute(async () => {
-    return await transactionCount({
-      user_id: user.id,
-    });
-  });
-
-  if (result) totalTransactions.value = result;
-
-  await loadTransactions();
-  balanceModalVisible.value = true;
-};
-
-/**
- * Called when the user changes the page in the transactions data table.
- * Updates the current page and loads the transactions for the new page.
- * @param {DataTablePageEvent} event - The event that triggered the page change.
- */
-const onPageChangeTransactions = async (event: DataTablePageEvent) => {
-  currentPageTransactions.value = event.page;
-
-  await loadTransactions();
-};
+const chosenTransactionDescription = ref<string>('');
 
 /**
  * Adds a new transaction for the user currently in edit.
@@ -123,24 +83,44 @@ const onPageChangeTransactions = async (event: DataTablePageEvent) => {
  * Resets the chosen transaction amount to 0.
  */
 const onAddNewTransaction = async () => {
-  const result = await errorToast.safeExecute(async () => {
-    return await transactionPost({
-      user_id: userInEdit.value!.id,
-      amount: chosenTransactionAmount.value,
-      transaction_type: (chosenTransactionType.value?.value as TransactionType) || 'refund',
-      date: new Date(),
-      description: '',
+  await transactions.create({
+    user_id: transactions.user.id,
+    amount: chosenTransactionAmount.value * 100, /* in kopecks */
+    transaction_type: chosenTransactionType.value.value,
+    date: new Date(),
+    description: chosenTransactionDescription.value,
+  });
+
+  chosenTransactionAmount.value = 0;
+  chosenTransactionDescription.value = '';
+};
+
+onMounted(async () => {
+  if (typeof userId !== 'string') router.push({ name: 'not-found' })
+
+  // Assigning the value triggers watch effect in the store, which fetches the data
+  transactions.userId = userId as Uuid;
+
+  Object.keys(transactionsLocale).forEach((transactionType) => {
+    allTransactionTypes.value.push({
+      label: transactionsLocale[transactionType as keyof typeof transactionsLocale]!,
+      value: transactionType as TransactionType,
     });
   });
 
-  if (!result) return;
+  chosenTransactionType.value = allTransactionTypes.value[0]!;
+})
 
-  chosenTransactionAmount.value = 0;
+watch(() => transactions.error, (err) => {
+  if (err) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: err,
+      life: 3000
+    })
 
-  totalTransactions.value += 1;
-  await loadTransactions();
-
-  // Update the user in edit to reflect the new balance
-  await updateUserInEdit();
-};
+    transactions.error = null;
+  }
+})
 </script>

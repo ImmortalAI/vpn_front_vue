@@ -1,61 +1,63 @@
 // #region imports
 import apiClient from '@/utils/apiClient';
 import {
-  TransactionCountRqSchema,
-  TransactionGetRqSchema,
-  TransactionPostRqSchema,
-  type TransactionAllGetRs,
-  type TransactionCountRq,
-  type TransactionCountRs,
-  type TransactionGetRq,
-  type TransactionPostRq,
-  type TransactionPostRs,
+  TransactionQuerySchema,
+  TransactionSchema,
+  type Transaction,
+  type TransactionQuery,
 } from '@/api/transaction/schema';
+import { UuidSchema, type Uuid } from '../base/schema';
+import z from 'zod';
 // #endregion
+
+const coerceTransaction = (transaction: Transaction): Transaction => {
+  return {
+    ...transaction,
+    date: z.coerce.date().parse(transaction.date),
+  };
+};
 
 /**
  * Creates a new transaction with the given data.
  *
- * @param {TransactionPostRq} transactionData - The transaction data.
- * @returns {Promise<TransactionPostRs>} The response message with the created transaction data.
+ * @param {Transaction} transactionData - The transaction data.
+ * @returns {Promise<Transaction>} The response message with the created transaction data.
  * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
  */
-export async function transactionPost(
-  transactionData: TransactionPostRq,
-): Promise<TransactionPostRs> {
-  TransactionPostRqSchema.parse(transactionData);
-  const response = await apiClient.post<TransactionPostRs>('/transactions', transactionData);
-  return response.data;
+export async function transactionPost(transactionData: Transaction): Promise<Transaction> {
+  TransactionSchema.parse(transactionData);
+  const response = await apiClient.post<Transaction>('/transactions', transactionData);
+  return coerceTransaction(response.data);
 }
 
 /**
  * Fetches the list of all transactions (optionally, for a specific user, limit, and offset).
  *
- * @param {TransactionGetRq | undefined} data - The parameters to filter the transactions.
- * @returns {Promise<TransactionAllGetRs>} An array of transaction data.
+ * @param {TransactionQuery | undefined} data - The parameters to filter the transactions.
+ * @returns {Promise<Transaction[]>} An array of transaction data.
  * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
  */
-export async function transactionGet(data?: TransactionGetRq): Promise<TransactionAllGetRs> {
-  TransactionGetRqSchema.parse(data ?? {});
-  const response = await apiClient.get<TransactionAllGetRs>('/transactions', {
+export async function transactionGet(data?: TransactionQuery): Promise<Transaction[]> {
+  TransactionQuerySchema.parse(data ?? {});
+  const response = await apiClient.get<Transaction[]>('/transactions', {
     params: data ?? {},
   });
-  return response.data;
+  return response.data.map(coerceTransaction);
 }
 
 /**
  * Gets the count of transactions with the given parameters (optionally, for a specific user).
  *
- * @param {TransactionCountRq} data - The parameters to filter the transactions by user.
- * @returns {Promise<TransactionCountRs>} The count of transactions.
+ * @param {Uuid | undefined} userId - The parameters to filter the transactions by user.
+ * @returns {Promise<number>} The count of transactions.
  * @throws {AxiosError | ZodError} If the API request fails or the response data cannot be parsed to the expected schema.
  */
-export async function transactionCount(
-  data: TransactionCountRq | undefined,
-): Promise<TransactionCountRs> {
-  TransactionCountRqSchema.parse(data ?? {});
-  const response = await apiClient.get<TransactionCountRs>('/transactions/count', {
-    params: data ?? {},
+export async function transactionCount(userId?: Uuid): Promise<number> {
+  if (userId) UuidSchema.parse(userId);
+  const response = await apiClient.get<number>('/transactions/count', {
+    params: {
+      user_id: userId,
+    },
   });
   return response.data;
 }
