@@ -135,7 +135,8 @@ export const useServersStore = defineStore('servers', () => {
 
     try {
       await serverPost(server);
-      await fetchData(true);
+      isInitialized.value = false;
+      await initialize();
     } catch (e) {
       const msg = errorExtractor(e);
       error.value = msg;
